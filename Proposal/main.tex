@@ -4,6 +4,8 @@
 \usepackage{color}
 \usepackage{fancyhdr}
 \usepackage{geometry}
+\usepackage{wrapfig}
+
 \geometry{
     a4paper,
     total={170mm,257mm},
@@ -52,11 +54,11 @@ Adversarial example에 대한 방어법은 크게 세 가지 정도로 분류해
 
 \subsubsection{FSGM (Fast Gradient Signed Method)}
 
-\begin{figure}[h]
+\begin{wrapfigure}{l}{0.45\textwidth}
     \centering
-    \includegraphics[width=10cm]{images/adversarial-example.png}
+    \includegraphics[width=0.45\textwidth]{images/adversarial-example.png}
     \caption{Example of generating adversarial example with FSGM \cite{goodfellow2014explaining}}
-\end{figure}
+\end{wrapfigure}
 
 \textbf{FSGM}은 일반적인 이미지 $x$에 대해서 classifer의 decision boundary를 넘을 수 있는 노이즈가 섞인 adversarial example $x'$를 생성하는 것을 목표로 한다. 즉, 이것은 모델 파라미터 $\theta$, $x$ 에 대한 label $y$에 대해 loss $J(\theta, x, y)$를 최대화시키도록 학습시키는 것을 기본적인 골자로 adversarial example을 획득하는 것이다. 이때, 위에서 구한 loss를 곧바로 이용하는 것이 아니라, $x$에 대한 gradient인 $\nabla_x$를 loss에 곱하여 이미지의 각 픽셀이 loss에 기여하는 정도를 adversarial example에 반영할 수 있도록 하였다. 이를 수식으로 나타내면 아래와 같다. \cite{goodfellow2014explaining}
 
@@ -86,21 +88,21 @@ C\&W는 어떤 이미지 $x$에 대해 classifier $C$ 가 잘못된 판단 $t$�
 
 \subsubsection{MagNet}
 
-\begin{figure}[h]
+\begin{wrapfigure}{r}{0.25\textwidth}
     \centering
-    \includegraphics[width=10cm]{images/magnet-diagram.png}
+    \includegraphics[width=0.25\textwidth]{images/magnet-diagram.png}
     \caption{Two autoencoders of \textbf{MagNet} \cite{carlini2017magnet}}
-\end{figure}
+\end{wrapfigure}
 
 \textbf{MagNet}은 adversarial example을 이용한 공격을 효과적으로 방어하기 위해서 \textbf{Detector}와 \textbf{Reformer}를 활용한다.\cite{carlini2017magnet} Detector와 reformer는 둘 다 인공 신경망을 학습시킨 데이터를 통해 학습시킨 autoencoder들이다. Detector는 입력된 이미지와 출력된 이미지의 변화된 정도를 통해 해당 이미지가 adversarial example인지 아닌지 확인하는 장치이다. 두 이미지의 차이가 일정 임계 정도를 넘으면 adversarial example이라고 판단하는 방식이다. 그리고 reformer는 입력받은 이미지를 autoencoder를 통해 인공 신경망이 학습한 데이터에 더 가깝게 변환시키는 역할을 한다. 이를 통해 이미지에 섞인 perturbation을 제거하는 것을 목표로 한다. 하지만 detector의 존재 때문에 classifier의 기능성을 저해할 뿐만 아니라 \textbf{MagNet}이 방어에 별로 효과가 없다는 연구\cite{carlini2017magnet} 또한 존재한다.
 
 \subsubsection{SHIELD}
 
-\begin{figure}[h]
+\begin{wrapfigure}{r}{0.25\textwidth}
     \centering
-    \includegraphics[width=8cm]{images/shield-example.png}
+    \includegraphics[width=0.25\textwidth]{images/shield-example.png}
     \caption{Stochastic Local Quantization of \textbf{SHIELD} \cite{das2018shield}}
-\end{figure}
+\end{wrapfigure}
 
 \textbf{SHIELD}는 JPEG 압축을 통한 이미지 전처리를 통해 adversarial example의 perturbation을 제거하는 것을 목표로 하는 방어 체계이다.\cite{das2018shield} \textbf{SHIELD}는 공격을 효과적으로 방어하기 위해 SLQ (Stochastic Local Quantization) 이라고 이름 붙인 기술을 도입하였다. SLQ는 이미지를 그리드로 나누어서 각 칸을 랜덤의 압축률로 압축한 뒤 다시 하나의 이미지로 합치는 기술이다. 이 기술을 통해 perturbation을 최대한 억제할 수 있도록 만들었다고 연구진은 설명한다. 하지만 SLQ의 전처리 과정은 classfier를 오히려 방해하였고, 이를 해결하기 위해 연구진은 "vaccinate", 즉 기존 인공 신경망에 JPEG로 압축된 이미지를 추가적으로 학습시키는 과정을 거쳐야 했다. 압축을 통해 정보를 줄이는 의도는 좋았으나, SLQ의 압축 과정이 분류 체계을 방해하지 않도록 인공 신경망을 vaccinate해야한다는 점이 이식성을 저해하여 아쉽게 평가된다.
 
@@ -135,8 +137,6 @@ C\&W는 어떤 이미지 $x$에 대해 classifier $C$ 가 잘못된 판단 $t$�
 
 \section{연구 추진 일정}
 %최종 발표에 맞추어 개략적인 연구 추진 계획을 기록합니다.
-
-해당 연구를 수월하게 수행하기 위해서 아래 표와 같은 일정을 수립하였다. 
 
 \begin{table}[h]
     \centering
