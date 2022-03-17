@@ -68,7 +68,7 @@ class Mnist:
             metrics=[self.accuracy],
         )
 
-        self.model.load_weight(self.checkpoint_filepath)
+        self.model.load_weights(self.checkpoint_filepath)
 
         self.model.fit(train_ds, epochs=epochs, callbacks=[self.checkpoint_callback])
         self.model.evaluate(test_ds)
