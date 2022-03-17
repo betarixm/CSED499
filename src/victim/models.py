@@ -1,5 +1,5 @@
-from tensorflow.python.keras import Sequential
-from tensorflow.python.keras import layers
+from tensorflow.keras import Sequential
+from tensorflow.keras import layers
 
 import tensorflow as tf
 
