@@ -73,7 +73,12 @@ class Mnist:
         except tf.errors.NotFoundError:
             pass
 
-        self.model.fit(train_ds, epochs=epochs, callbacks=[self.checkpoint_callback])
+        self.model.fit(
+            train_ds,
+            epochs=epochs,
+            validation_data=test_ds,
+            callbacks=[self.checkpoint_callback],
+        )
         self.model.evaluate(test_ds)
 
 
