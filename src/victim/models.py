@@ -34,7 +34,7 @@ class Mnist:
         self,
         optimizer=tf.keras.optimizers.Adam(),
         loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
-        accuracy=tf.keras.metrics.SparseCategoricalAccuracy(name="train_accuracy"),
+        accuracy=tf.keras.metrics.SparseCategoricalAccuracy(name="accuracy"),
     ):
         self.optimizer = optimizer
         self.loss = loss
