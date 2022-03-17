@@ -21,6 +21,15 @@ class Mnist:
 
     model.summary()
 
+    checkpoint_filepath = "./checkpoint/mnist"
+    checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
+        filepath=checkpoint_filepath,
+        save_weights_only=True,
+        monitor="val_accuracy",
+        mode="max",
+        save_best_only=True,
+    )
+
     def __init__(
         self,
         optimizer=tf.keras.optimizers.Adam(),
@@ -58,7 +67,10 @@ class Mnist:
             loss=self.loss,
             metrics=[self.accuracy],
         )
-        self.model.fit(train_ds, epochs=epochs)
+
+        self.model.load_weight(self.checkpoint_filepath)
+
+        self.model.fit(train_ds, epochs=epochs, callbacks=[self.checkpoint_callback])
         self.model.evaluate(test_ds)
 
 
