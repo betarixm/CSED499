@@ -1,5 +1,5 @@
 from tensorflow.python.keras import Model
-from tensorflow.python.keras.layers import Dense, Flatten, Conv2D
+from tensorflow.python.keras import layers
 
 import tensorflow as tf
 
@@ -8,16 +8,22 @@ class Mnist:
     class Network(Model):
         def __init__(self):
             super(self.__class__, self).__init__()
-            self.conv1 = Conv2D(32, 3, activation="relu")
-            self.flatten = Flatten()
-            self.d1 = Dense(128, activation="relu")
-            self.d2 = Dense(10)
+            self.conv1 = layers.Conv2D(
+                32, (3, 3), activation="relu", input_shape=(28, 28, 1)
+            )
+            self.conv2 = layers.Conv2D(64, (3, 3), activation="relu")
+            self.max_pooling = layers.MaxPooling2D((2, 2))
 
         def call(self, x):
             x = self.conv1(x)
-            x = self.flatten(x)
-            x = self.d1(x)
-            return self.d2(x)
+            x = self.max_pooling(x)
+            x = self.conv2(x)
+            x = self.max_pooling(x)
+            x = self.conv2(x)
+            x = layers.Flatten()(x)
+            x = layers.Dense(64, activation="relu")(x)
+            x = layers.Dense(10, activation="softmax")(x)
+            return x
 
     model = Network()
 
