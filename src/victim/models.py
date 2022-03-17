@@ -24,22 +24,12 @@ class Mnist:
     def __init__(
         self,
         optimizer=tf.keras.optimizers.Adam(),
-        train_loss=tf.keras.metrics.Mean(name="train_loss"),
-        train_accuracy=tf.keras.metrics.SparseCategoricalAccuracy(
-            name="train_accuracy"
-        ),
-        test_loss=tf.keras.metrics.Mean(name="test_loss"),
-        test_accuracy=tf.keras.metrics.SparseCategoricalAccuracy(name="test_accuracy"),
-        loss_object=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
+        loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
+        accuracy=tf.keras.metrics.SparseCategoricalAccuracy(name="train_accuracy"),
     ):
         self.optimizer = optimizer
-        self.train_loss = train_loss
-        self.train_accuracy = train_accuracy
-
-        self.test_loss = test_loss
-        self.test_accuracy = test_accuracy
-
-        self.loss_object = loss_object
+        self.loss = loss
+        self.accuracy = accuracy
 
     def dataset(self):
         mnist = tf.keras.datasets.mnist
@@ -62,6 +52,12 @@ class Mnist:
 
     def train(self, epochs: int = 100):
         train_ds, test_ds = self.dataset()
+
+        self.model.compile(
+            optimizer=self.optimizer,
+            loss=self.loss,
+            metrics=[self.accuracy],
+        )
         self.model.fit(train_ds, epochs=epochs)
         self.model.evaluate(test_ds)
 
