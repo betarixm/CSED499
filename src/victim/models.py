@@ -68,7 +68,10 @@ class Mnist:
             metrics=[self.accuracy],
         )
 
-        self.model.load_weights(self.checkpoint_filepath)
+        try:
+            self.model.load_weights(self.checkpoint_filepath)
+        except tf.errors.NotFoundError:
+            pass
 
         self.model.fit(train_ds, epochs=epochs, callbacks=[self.checkpoint_callback])
         self.model.evaluate(test_ds)
