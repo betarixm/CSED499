@@ -1,31 +1,25 @@
-from tensorflow.python.keras import Model
+from tensorflow.python.keras import Sequential
 from tensorflow.python.keras import layers
 
 import tensorflow as tf
 
 
 class Mnist:
-    class Network(Model):
-        def __init__(self):
-            super(self.__class__, self).__init__()
-            self.conv1 = layers.Conv2D(
-                32, (3, 3), activation="relu", input_shape=(28, 28, 1)
-            )
-            self.conv2 = layers.Conv2D(64, (3, 3), activation="relu")
-            self.max_pooling = layers.MaxPooling2D((2, 2))
+    model = Sequential(
+        [
+            layers.Conv2D(32, (3, 3), activation="relu", input_shape=(28, 28, 1)),
+            layers.MaxPooling2D((2, 2)),
+            layers.Conv2D(64, (3, 3), activation="relu"),
+            layers.MaxPooling2D((2, 2)),
+            layers.Conv2D(64, (3, 3), activation="relu"),
+            layers.Flatten(),
+            layers.Dense(64, activation="relu"),
+            layers.Dense(10, activation="softmax"),
+        ],
+        name="victim_mnist",
+    )
 
-        def call(self, x):
-            x = self.conv1(x)
-            x = self.max_pooling(x)
-            x = self.conv2(x)
-            x = self.max_pooling(x)
-            x = self.conv2(x)
-            x = layers.Flatten()(x)
-            x = layers.Dense(64, activation="relu")(x)
-            x = layers.Dense(10, activation="softmax")(x)
-            return x
-
-    model = Network()
+    model.summary()
 
     def __init__(
         self,
@@ -67,47 +61,9 @@ class Mnist:
         return train_ds, test_ds
 
     def train(self, epochs: int = 100):
-        @tf.function
-        def train_step(images, labels):
-            with tf.GradientTape() as tape:
-                predictions = self.model(images, training=True)
-                loss = self.loss_object(labels, predictions)
-            gradients = tape.gradient(loss, self.model.trainable_variables)
-            self.optimizer.apply_gradients(
-                zip(gradients, self.model.trainable_variables)
-            )
-
-            self.train_loss(loss)
-            self.train_accuracy(labels, predictions)
-
-        @tf.function
-        def test_step(images, labels):
-            predictions = self.model(images, training=False)
-            t_loss = self.loss_object(labels, predictions)
-
-            self.test_loss(t_loss)
-            self.test_accuracy(labels, predictions)
-
         train_ds, test_ds = self.dataset()
-
-        for epoch in range(epochs):
-            # Reset the metrics at the start of the next epoch
-            self.train_loss.reset_states(), self.train_accuracy.reset_states()
-            self.test_loss.reset_states(), self.test_accuracy.reset_states()
-
-            for images, labels in train_ds:
-                train_step(images, labels)
-
-            for test_images, test_labels in test_ds:
-                test_step(test_images, test_labels)
-
-            print(
-                f"Epoch {epoch + 1}, "
-                f"Loss: {self.train_loss.result()}, "
-                f"Accuracy: {self.train_accuracy.result() * 100}, "
-                f"Test Loss: {self.test_loss.result()}, "
-                f"Test Accuracy: {self.test_accuracy.result() * 100}"
-            )
+        self.model.fit(train_ds, epochs=epochs)
+        self.model.evaluate(test_ds)
 
 
 if __name__ == "__main__":
