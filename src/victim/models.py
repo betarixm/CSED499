@@ -8,9 +8,9 @@ class Mnist:
     class Network(Model):
         def __init__(self):
             super(self.__class__, self).__init__()
-            self.conv1 = Conv2D(32, 3, activation='relu')
+            self.conv1 = Conv2D(32, 3, activation="relu")
             self.flatten = Flatten()
-            self.d1 = Dense(128, activation='relu')
+            self.d1 = Dense(128, activation="relu")
             self.d2 = Dense(10)
 
         def call(self, x):
@@ -21,6 +21,26 @@ class Mnist:
 
     model = Network()
 
+    def __init__(
+        self,
+        optimizer=tf.keras.optimizers.Adam(),
+        train_loss=tf.keras.metrics.Mean(name="train_loss"),
+        train_accuracy=tf.keras.metrics.SparseCategoricalAccuracy(
+            name="train_accuracy"
+        ),
+        test_loss=tf.keras.metrics.Mean(name="test_loss"),
+        test_accuracy=tf.keras.metrics.SparseCategoricalAccuracy(name="test_accuracy"),
+        loss_object=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
+    ):
+        self.optimizer = optimizer
+        self.train_loss = train_loss
+        self.train_accuracy = train_accuracy
+
+        self.test_loss = test_loss
+        self.test_accuracy = test_accuracy
+
+        self.loss_object = loss_object
+
     def dataset(self):
         mnist = tf.keras.datasets.mnist
 
@@ -30,56 +50,44 @@ class Mnist:
         x_train = x_train[..., tf.newaxis].astype("float32")
         x_test = x_test[..., tf.newaxis].astype("float32")
 
-        train_ds = tf.data.Dataset.from_tensor_slices(
-            (x_train, y_train)).shuffle(10000).batch(32)
+        train_ds = (
+            tf.data.Dataset.from_tensor_slices((x_train, y_train))
+            .shuffle(10000)
+            .batch(32)
+        )
 
         test_ds = tf.data.Dataset.from_tensor_slices((x_test, y_test)).batch(32)
 
         return train_ds, test_ds
 
-    def train(self):
-        train_loss = tf.keras.metrics.Mean(name='train_loss')
-        train_accuracy = tf.keras.metrics.SparseCategoricalAccuracy(name='train_accuracy')
-
-        test_loss = tf.keras.metrics.Mean(name='test_loss')
-        test_accuracy = tf.keras.metrics.SparseCategoricalAccuracy(name='test_accuracy')
-
-        loss_object = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
-        optimizer = tf.keras.optimizers.Adam()
-
+    def train(self, epochs: int = 100):
         @tf.function
         def train_step(images, labels):
             with tf.GradientTape() as tape:
-                # training=True is only needed if there are layers with different
-                # behavior during training versus inference (e.g. Dropout).
                 predictions = self.model(images, training=True)
-                loss = loss_object(labels, predictions)
+                loss = self.loss_object(labels, predictions)
             gradients = tape.gradient(loss, self.model.trainable_variables)
-            optimizer.apply_gradients(zip(gradients, self.model.trainable_variables))
+            self.optimizer.apply_gradients(
+                zip(gradients, self.model.trainable_variables)
+            )
 
-            train_loss(loss)
-            train_accuracy(labels, predictions)
+            self.train_loss(loss)
+            self.train_accuracy(labels, predictions)
 
         @tf.function
         def test_step(images, labels):
-            # training=False is only needed if there are layers with different
-            # behavior during training versus inference (e.g. Dropout).
             predictions = self.model(images, training=False)
-            t_loss = loss_object(labels, predictions)
+            t_loss = self.loss_object(labels, predictions)
 
-            test_loss(t_loss)
-            test_accuracy(labels, predictions)
-
-        EPOCHS = 5
+            self.test_loss(t_loss)
+            self.test_accuracy(labels, predictions)
 
         train_ds, test_ds = self.dataset()
 
-        for epoch in range(EPOCHS):
+        for epoch in range(epochs):
             # Reset the metrics at the start of the next epoch
-            train_loss.reset_states()
-            train_accuracy.reset_states()
-            test_loss.reset_states()
-            test_accuracy.reset_states()
+            self.train_loss.reset_states(), self.train_accuracy.reset_states()
+            self.test_loss.reset_states(), self.test_accuracy.reset_states()
 
             for images, labels in train_ds:
                 train_step(images, labels)
@@ -88,11 +96,11 @@ class Mnist:
                 test_step(test_images, test_labels)
 
             print(
-                f'Epoch {epoch + 1}, '
-                f'Loss: {train_loss.result()}, '
-                f'Accuracy: {train_accuracy.result() * 100}, '
-                f'Test Loss: {test_loss.result()}, '
-                f'Test Accuracy: {test_accuracy.result() * 100}'
+                f"Epoch {epoch + 1}, "
+                f"Loss: {self.train_loss.result()}, "
+                f"Accuracy: {self.train_accuracy.result() * 100}, "
+                f"Test Loss: {self.test_loss.result()}, "
+                f"Test Accuracy: {self.test_accuracy.result() * 100}"
             )
 
 
