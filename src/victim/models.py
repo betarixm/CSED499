@@ -7,7 +7,7 @@ import tensorflow as tf
 class Mnist:
     class Network(Model):
         def __init__(self):
-            super(Mnist.Network, self).__init__()
+            super(self.__class__, self).__init__()
             self.conv1 = Conv2D(32, 3, activation='relu')
             self.flatten = Flatten()
             self.d1 = Dense(128, activation='relu')
