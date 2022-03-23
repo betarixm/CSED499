@@ -51,7 +51,13 @@ class Reformer(Model):
                 layer_conv2d(),
                 keras.layers.UpSampling2D((2, 2)),
                 layer_conv2d(),
-                layer_conv2d(),
+                keras.layers.Conv2D(
+                    self.input_shape()[-1],
+                    (3, 3),
+                    activation="sigmoid",
+                    padding="same",
+                    activity_regularizer=keras.regularizers.l2(1e-9),
+                ),
             ]
         )
 
