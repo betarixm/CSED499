@@ -1,6 +1,7 @@
 from typings.models import Model
 from utils.dataset import NoisyMnist
 
+import numpy as np
 import tensorflow as tf
 
 keras = tf.keras
@@ -52,6 +53,14 @@ class Reformer(Model):
                 layer_conv2d(),
             ]
         )
+
+    def pre_train(self):
+        with self.tensorboard_file_writer().as_default():
+            x = np.concatenate([x for x, y in self.data_test.take(1)], axis=0)
+            tf.summary.image(f"{self.name()} test input", x, step=0)
+
+    def post_train(self):
+        pass
 
 
 if __name__ == "__main__":

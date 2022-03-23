@@ -79,6 +79,13 @@ class Model(ABC):
         pass
 
     @abstractmethod
+    def pre_train(self):
+        pass
+
+    @abstractmethod
+    def post_train(self):
+        pass
+
 
     def name(self) -> str:
         return self._name
@@ -94,6 +101,7 @@ class Model(ABC):
 
 
     def train(self, epochs: int = 100):
+        self.pre_train()
 
         self.__model.compile(
             optimizer=self.optimizer,
@@ -116,3 +124,4 @@ class Model(ABC):
 
         self.__model.evaluate(self.data_test)
 
+        self.post_train()
