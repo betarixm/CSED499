@@ -1,3 +1,4 @@
+from typing import List
 from typings.models import Model
 from utils.dataset import Mnist as MnistDataset
 
@@ -55,6 +56,10 @@ class Mnist(Model):
 
     def post_train(self):
         pass
+
+    def custom_callbacks(self) -> List[keras.callbacks.Callback]:
+        return []
+
 
 if __name__ == "__main__":
     train_set, test_set = MnistDataset()

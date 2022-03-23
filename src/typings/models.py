@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from typing import List
 
 import datetime
 
@@ -86,6 +87,9 @@ class Model(ABC):
     def post_train(self):
         pass
 
+    @abstractmethod
+    def custom_callbacks(self) -> List[keras.callbacks.Callback]:
+        pass
 
     def name(self) -> str:
         return self._name
@@ -119,7 +123,11 @@ class Model(ABC):
             self.data_train,
             epochs=epochs,
             validation_data=self.data_test,
-            callbacks=[self.checkpoint_callback],
+            callbacks=[
+                self.checkpoint_callback,
+                self.tensorboard_callback,
+                *self.custom_callbacks(),
+            ],
         )
 
         self.__model.evaluate(self.data_test)

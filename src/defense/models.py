@@ -1,3 +1,4 @@
+from typing import List
 from typings.models import Model
 from utils.dataset import NoisyMnist
 
@@ -61,6 +62,17 @@ class Reformer(Model):
 
     def post_train(self):
         pass
+
+    def custom_callbacks(self) -> List[keras.callbacks.Callback]:
+        def predict(epoch, logs):
+            with self.tensorboard_file_writer().as_default():
+                tf.summary.image(
+                    f"{self.name()} (epoch: {epoch}) test prediction",
+                    self.model().predict(self.data_test.take(1)),
+                    step=epoch,
+                )
+
+        return [keras.callbacks.LambdaCallback(on_epoch_end=predict)]
 
 
 if __name__ == "__main__":
