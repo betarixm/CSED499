@@ -31,10 +31,7 @@ class Mnist(Model):
             checkpoint_filepath,
         )
 
-    def name(self) -> str:
-        return "victim_mnist"
-
-    def model(self) -> keras.Model:
+    def _model(self) -> keras.Model:
         return keras.Sequential(
             [
                 keras.layers.Conv2D(32, (3, 3), activation="relu"),

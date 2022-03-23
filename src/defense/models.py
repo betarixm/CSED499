@@ -31,10 +31,7 @@ class Reformer(Model):
             checkpoint_filepath,
         )
 
-    def name(self) -> str:
-        return "defense_reformer"
-
-    def model(self) -> keras.Model:
+    def _model(self) -> keras.Model:
         def layer_conv2d():
             return keras.layers.Conv2D(
                 3,

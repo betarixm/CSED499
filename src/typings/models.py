@@ -28,6 +28,7 @@ class Model(ABC):
 
         self.__input_shape = input_shape
 
+        self.__model: keras.Model = keras.Sequential(
             [keras.Input(self.__input_shape), *self._model().layers], name=self._name
         )
 
@@ -51,7 +52,7 @@ class Model(ABC):
         )
 
     @abstractmethod
-    def name(self) -> str:
+    def _model(self) -> keras.Model:
         pass
 
     @abstractmethod
@@ -63,26 +64,29 @@ class Model(ABC):
         return self.__input_shape
 
     def model(self) -> keras.Model:
-        pass
+        return self.__model
+
 
     def train(self, epochs: int = 100):
-        self._model.compile(
+
+        self.__model.compile(
             optimizer=self.optimizer,
             loss=self.loss,
             metrics=[self.accuracy],
         )
 
         try:
-            self._model.load_weights(self.checkpoint_filepath)
+            self.__model.load_weights(self.checkpoint_filepath)
         except tf.errors.NotFoundError:
             pass
 
-        self._model.summary()
-        self._model.fit(
+        self.__model.summary()
+        self.__model.fit(
             self.data_train,
             epochs=epochs,
             validation_data=self.data_test,
             callbacks=[self.checkpoint_callback],
         )
 
-        self._model.evaluate(self.data_test)
+        self.__model.evaluate(self.data_test)
+
