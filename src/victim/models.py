@@ -1,20 +1,19 @@
-from tensorflow.keras import Sequential
-from tensorflow.keras import layers
-
 import tensorflow as tf
+
+keras = tf.keras
 
 
 class Mnist:
-    model = Sequential(
+    model = keras.Sequential(
         [
-            layers.Conv2D(32, (3, 3), activation="relu", input_shape=(28, 28, 1)),
-            layers.MaxPooling2D((2, 2)),
-            layers.Conv2D(64, (3, 3), activation="relu"),
-            layers.MaxPooling2D((2, 2)),
-            layers.Conv2D(64, (3, 3), activation="relu"),
-            layers.Flatten(),
-            layers.Dense(64, activation="relu"),
-            layers.Dense(10, activation="softmax"),
+            keras.layers.Conv2D(32, (3, 3), activation="relu", input_shape=(28, 28, 1)),
+            keras.layers.MaxPooling2D((2, 2)),
+            keras.layers.Conv2D(64, (3, 3), activation="relu"),
+            keras.layers.MaxPooling2D((2, 2)),
+            keras.layers.Conv2D(64, (3, 3), activation="relu"),
+            keras.layers.Flatten(),
+            keras.layers.Dense(64, activation="relu"),
+            keras.layers.Dense(10, activation="softmax"),
         ],
         name="victim_mnist",
     )
@@ -22,7 +21,7 @@ class Mnist:
     model.summary()
 
     checkpoint_filepath = "./checkpoint/mnist"
-    checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
+    checkpoint_callback = keras.callbacks.ModelCheckpoint(
         filepath=checkpoint_filepath,
         save_weights_only=True,
         monitor="val_accuracy",
@@ -32,16 +31,16 @@ class Mnist:
 
     def __init__(
         self,
-        optimizer=tf.keras.optimizers.Adam(),
-        loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
-        accuracy=tf.keras.metrics.SparseCategoricalAccuracy(name="accuracy"),
+        optimizer=keras.optimizers.Adam(),
+        loss=keras.losses.SparseCategoricalCrossentropy(from_logits=True),
+        accuracy=keras.metrics.SparseCategoricalAccuracy(name="accuracy"),
     ):
         self.optimizer = optimizer
         self.loss = loss
         self.accuracy = accuracy
 
     def dataset(self):
-        mnist = tf.keras.datasets.mnist
+        mnist = keras.datasets.mnist
 
         (x_train, y_train), (x_test, y_test) = mnist.load_data()
         x_train, x_test = x_train / 255.0, x_test / 255.0
