@@ -26,10 +26,9 @@ class Model(ABC):
         self.data_train: tf.data.Dataset = data_train
         self.data_test: tf.data.Dataset = data_test
 
-        self.input_shape = input_shape
+        self.__input_shape = input_shape
 
-        self._model: keras.Model = keras.Sequential(
-            [keras.Input(self.input_shape), *self.model().layers], name=self._name
+            [keras.Input(self.__input_shape), *self._model().layers], name=self._name
         )
 
         self.optimizer: keras.optimizers.Optimizer = optimizer
@@ -59,6 +58,9 @@ class Model(ABC):
 
     def name(self) -> str:
         return self._name
+
+    def input_shape(self) -> tuple:
+        return self.__input_shape
 
     def model(self) -> keras.Model:
         pass
