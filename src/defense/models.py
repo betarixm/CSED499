@@ -12,6 +12,7 @@ class Reformer(Model):
         data_train: tf.data.Dataset,
         data_test: tf.data.Dataset,
         input_shape: tuple,
+        name: str = "defense_reformer",
         optimizer: keras.optimizers.Optimizer = keras.optimizers.Adam(),
         loss: keras.losses.Loss = keras.losses.SparseCategoricalCrossentropy(),
         accuracy: keras.metrics.Accuracy = keras.metrics.SparseCategoricalAccuracy(
@@ -20,6 +21,7 @@ class Reformer(Model):
         checkpoint_filepath: str = None,
     ):
         super().__init__(
+            name,
             data_train,
             data_test,
             input_shape,

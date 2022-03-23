@@ -8,6 +8,7 @@ keras = tf.keras
 class Model(ABC):
     def __init__(
         self,
+        name: str,
         data_train: tf.data.Dataset,
         data_test: tf.data.Dataset,
         input_shape: tuple,
@@ -20,7 +21,7 @@ class Model(ABC):
         ),
         checkpoint_filepath: str = None,
     ):
-        self._name: str = self.name()
+        self._name: str = name
 
         self.data_train: tf.data.Dataset = data_train
         self.data_test: tf.data.Dataset = data_test
@@ -55,6 +56,10 @@ class Model(ABC):
         pass
 
     @abstractmethod
+
+    def name(self) -> str:
+        return self._name
+
     def model(self) -> keras.Model:
         pass
 
