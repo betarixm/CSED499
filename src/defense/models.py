@@ -16,7 +16,7 @@ class Reformer(Model):
         input_shape: tuple,
         name: str = "defense_reformer",
         optimizer: keras.optimizers.Optimizer = keras.optimizers.Adam(),
-        loss: keras.losses.Loss = keras.losses.SparseCategoricalCrossentropy(),
+        loss: keras.losses.Loss = keras.losses.MeanSquaredError(),
         accuracy: keras.metrics.Accuracy = keras.metrics.SparseCategoricalAccuracy(
             name="accuracy"
         ),
