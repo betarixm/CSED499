@@ -1,5 +1,7 @@
 from abc import ABC, abstractmethod
 
+import datetime
+
 import tensorflow as tf
 
 keras = tf.keras
@@ -20,6 +22,7 @@ class Model(ABC):
             name="accuracy"
         ),
         checkpoint_filepath: str = None,
+        tensorboard_log_path: str = None,
     ):
         self._name: str = name
 
@@ -51,6 +54,26 @@ class Model(ABC):
             )
         )
 
+        self.tensorboard_log_path = (
+            (
+                tensorboard_log_path
+                if tensorboard_log_path is not None
+                else f"./logs/{self._name}"
+            )
+            + "/"
+            + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+        )
+        self.tensorboard_callback: keras.callbacks.Callback = (
+            keras.callbacks.TensorBoard(
+                log_dir=f"{self.tensorboard_log_path}",
+                histogram_freq=1,
+            )
+        )
+
+        self._file_writer: tf.summary.SummaryWriter = tf.summary.create_file_writer(
+            self.tensorboard_log_path
+        )
+
     @abstractmethod
     def _model(self) -> keras.Model:
         pass
@@ -65,6 +88,9 @@ class Model(ABC):
 
     def model(self) -> keras.Model:
         return self.__model
+
+    def tensorboard_file_writer(self) -> tf.summary.SummaryWriter:
+        return self._file_writer
 
 
     def train(self, epochs: int = 100):
