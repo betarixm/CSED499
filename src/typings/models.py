@@ -103,6 +103,11 @@ class Model(ABC):
     def tensorboard_file_writer(self) -> tf.summary.SummaryWriter:
         return self._file_writer
 
+    def load(self):
+        self.__model.load_weights(self.checkpoint_filepath)
+
+    def predict(self, inputs):
+        return self.__model.predict(inputs)
 
     def train(self, epochs: int = 100):
         self.pre_train()
