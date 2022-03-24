@@ -1,6 +1,7 @@
 from utils.dataset import NoisyMnist, NoisyCifar10
 from models import Reformer
 
+import sys
 import tensorflow as tf
 
 keras = tf.keras
@@ -25,4 +26,14 @@ def train_cifar10_reformer():
 
 
 if __name__ == "__main__":
-    train_mnist_reformer()
+    if len(sys.argv) != 2:
+        exit("Error: select 'mnist' or 'cifar10'.")
+
+    option = sys.argv[1]
+
+    if option == "mnist":
+        train_mnist_reformer()
+    elif option == "cifar10":
+        train_cifar10_reformer()
+    else:
+        exit("Error: select 'mnist' or 'cifar10'.")
