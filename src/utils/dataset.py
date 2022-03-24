@@ -1,47 +1,34 @@
-from typings.dataset import Dataset, TestSet, TrainSet
+from typing import Tuple
+from typings.dataset import ImageDataset, GrayscaleMixin, NoisyMixin
+from typings.dataset import NumpyDataset
 
-import numpy as np
 import tensorflow as tf
 
 keras = tf.keras
 
 
-class Mnist(Dataset):
-    @staticmethod
-    def load_data():
-        mnist = keras.datasets.mnist
+class Mnist(ImageDataset, GrayscaleMixin):
+    def __init__(self):
+        super().__init__(keras.datasets.mnist)
 
-        (x_train, y_train), (x_test, y_test) = mnist.load_data()
-        x_train, x_test = x_train / 255.0, x_test / 255.0
-
-        x_train = x_train[..., tf.newaxis].astype("float32")
-        x_test = x_test[..., tf.newaxis].astype("float32")
-
+    def postprocess(
+        self, train: NumpyDataset, test: NumpyDataset
+    ) -> Tuple[NumpyDataset, NumpyDataset]:
+        (x_train, y_train), (x_test, y_test) = GrayscaleMixin.process(train, test)
         return (x_train, y_train), (x_test, y_test)
 
-    @staticmethod
-    def dataset() -> (TestSet, TrainSet):
-        (x_train, y_train), (x_test, y_test) = Mnist.load_data()
 
-        train_ds = (
-            tf.data.Dataset.from_tensor_slices((x_train, y_train))
-            .shuffle(10000)
-            .batch(32)
-        )
+class NoisyMnist(ImageDataset, GrayscaleMixin, NoisyMixin):
+    def __init__(self):
+        super().__init__(keras.datasets.mnist)
 
-        test_ds = tf.data.Dataset.from_tensor_slices((x_test, y_test)).batch(32)
+    def postprocess(
+        self, train: NumpyDataset, test: NumpyDataset
+    ) -> Tuple[NumpyDataset, NumpyDataset]:
+        train, test = GrayscaleMixin.process(train, test)
+        (x_train, y_train), (x_test, y_test) = NoisyMixin.process(train, test)
+        return (x_train, y_train), (x_test, y_test)
 
-        return train_ds, test_ds
-
-
-class NoisyMnist(Dataset):
-    @staticmethod
-    def dataset() -> (TestSet, TrainSet):
-        def noisy(ds):
-            noise = 0.1 * np.random.normal(size=np.shape(ds))
-            return np.clip(ds + noise, 0.0, 1.0)
-
-        (x_train, y_train), (x_test, y_test) = Mnist.load_data()
 
         x_train_noisy, x_test_noisy = noisy(x_train), noisy(x_test)
 

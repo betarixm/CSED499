@@ -47,8 +47,6 @@ class Mnist(Model):
             ],
         )
 
-
-
     def pre_train(self):
         with self.tensorboard_file_writer().as_default():
             x = np.concatenate([x for x, y in self.data_test.take(1)], axis=0)
@@ -62,6 +60,6 @@ class Mnist(Model):
 
 
 if __name__ == "__main__":
-    train_set, test_set = MnistDataset()
+    train_set, test_set = MnistDataset().dataset()
     mnist = Mnist(train_set, test_set, (28, 28, 1))
     mnist.train()

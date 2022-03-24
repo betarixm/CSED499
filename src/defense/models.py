@@ -82,6 +82,5 @@ class Reformer(Model):
 
 
 if __name__ == "__main__":
-    train_set, test_set = NoisyMnist()
-    reformer = Reformer(train_set, test_set, (28, 28, 1))
+    train_set, test_set = NoisyMnist().dataset()
     reformer.train()
