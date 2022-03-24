@@ -45,7 +45,9 @@ class Dataset(ABC):
 
         return (x_train, y_train), (x_test, y_test)
 
-    def dataset(self, shuffle: int = 10000, batch: int = 32) -> Tuple[TestSet, TrainSet]:
+    def dataset(
+        self, shuffle: int = 10000, batch: int = 32
+    ) -> Tuple[TestSet, TrainSet]:
         (x_train, y_train), (x_test, y_test) = self.load_data()
 
         train_ds = (
