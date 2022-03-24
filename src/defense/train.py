@@ -12,6 +12,17 @@ def train_mnist_reformer():
     reformer.train()
 
 
+def train_cifar10_reformer():
+    train_set, test_set = NoisyCifar10().dataset()
+    reformer = Reformer(
+        train_set,
+        test_set,
+        (32, 32, 3),
+        name="defense_reformer_cifar10",
+        accuracy=keras.metrics.CategoricalAccuracy(name="accuracy"),
+    )
+    reformer.train()
+
 
 if __name__ == "__main__":
     train_mnist_reformer()
