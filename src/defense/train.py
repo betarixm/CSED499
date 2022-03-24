@@ -48,9 +48,9 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    epochs = args.epochs if args.epochs is not None else 500
+    e = args.epochs if args.epochs is not None else 500
 
     if args.dataset == "mnist":
-        train_mnist_reformer(epochs)
+        train_mnist_reformer(e)
     elif args.dataset == "cifar10":
-        train_cifar10_reformer(epochs)
+        train_cifar10_reformer(e)
