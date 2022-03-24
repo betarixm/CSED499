@@ -7,13 +7,13 @@ import tensorflow as tf
 keras = tf.keras
 
 
-def train_mnist_reformer():
+def train_mnist_reformer(epochs: int = 100):
     train_set, test_set = NoisyMnist().dataset()
     reformer = Reformer(train_set, test_set, (28, 28, 1), name="defense_reformer_mnist")
-    reformer.train()
+    reformer.train(epochs)
 
 
-def train_cifar10_reformer():
+def train_cifar10_reformer(epochs: int = 100):
     train_set, test_set = NoisyCifar10().dataset()
     reformer = Reformer(
         train_set,
@@ -22,7 +22,7 @@ def train_cifar10_reformer():
         name="defense_reformer_cifar10",
         accuracy=keras.metrics.CategoricalAccuracy(name="accuracy"),
     )
-    reformer.train()
+    reformer.train(epochs)
 
 
 if __name__ == "__main__":
