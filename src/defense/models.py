@@ -1,6 +1,5 @@
 from typing import List
 from typings.models import Model
-from utils.dataset import NoisyMnist
 
 import numpy as np
 import tensorflow as tf
@@ -79,8 +78,3 @@ class Reformer(Model):
                 )
 
         return [keras.callbacks.LambdaCallback(on_epoch_end=predict)]
-
-
-if __name__ == "__main__":
-    train_set, test_set = NoisyMnist().dataset()
-    reformer.train()
