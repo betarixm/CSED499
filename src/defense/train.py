@@ -9,17 +9,22 @@ keras = tf.keras
 
 def train_mnist_reformer(epochs: int = 100):
     train_set, test_set = NoisyMnist().dataset()
-    reformer = Reformer(train_set, test_set, (28, 28, 1), name="defense_reformer_mnist")
+    reformer = Reformer(
+        "defense_reformer_mnist",
+        (28, 28, 1),
+        train_set,
+        test_set,
+    )
     reformer.train(epochs)
 
 
 def train_cifar10_reformer(epochs: int = 100):
     train_set, test_set = NoisyCifar10().dataset()
     reformer = Reformer(
+        "defense_reformer_cifar10",
+        (32, 32, 3),
         train_set,
         test_set,
-        (32, 32, 3),
-        name="defense_reformer_cifar10",
         accuracy=keras.metrics.CategoricalAccuracy(name="accuracy"),
     )
     reformer.train(epochs)

@@ -10,7 +10,10 @@ keras = tf.keras
 def train_mnist_classifier(epochs: int = 100):
     train_set, test_set = Mnist().dataset()
     classifier = Classifier(
-        train_set, test_set, (28, 28, 1), name="victim_classifier_mnist"
+        "victim_classifier_mnist",
+        (28, 28, 1),
+        train_set,
+        test_set,
     )
     classifier.train(epochs)
 
@@ -18,10 +21,10 @@ def train_mnist_classifier(epochs: int = 100):
 def train_cifar10_classifier(epochs: int = 100):
     train_set, test_set = Cifar10().dataset()
     reformer = Classifier(
+        "victim_classifier_cifar10",
+        (32, 32, 3),
         train_set,
         test_set,
-        (32, 32, 3),
-        name="victim_classifier_cifar10",
     )
     reformer.train(epochs)
 

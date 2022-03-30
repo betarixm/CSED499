@@ -11,10 +11,10 @@ keras = tf.keras
 class Classifier(Model):
     def __init__(
         self,
-        data_train: tf.data.Dataset,
-        data_test: tf.data.Dataset,
+        name: str,
         input_shape: tuple,
-        name: str = "victim_mnist",
+        data_train: tf.data.Dataset = None,
+        data_test: tf.data.Dataset = None,
         optimizer: keras.optimizers.Optimizer = keras.optimizers.Adam(),
         loss: keras.losses.Loss = keras.losses.SparseCategoricalCrossentropy(),
         accuracy: keras.metrics.Accuracy = keras.metrics.SparseCategoricalAccuracy(
@@ -57,9 +57,3 @@ class Classifier(Model):
 
     def custom_callbacks(self) -> List[keras.callbacks.Callback]:
         return []
-
-
-if __name__ == "__main__":
-    train_set, test_set = MnistDataset().dataset()
-    mnist = Classifier(train_set, test_set, (28, 28, 1))
-    mnist.train()

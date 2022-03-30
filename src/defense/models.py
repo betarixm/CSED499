@@ -10,10 +10,10 @@ keras = tf.keras
 class Reformer(Model):
     def __init__(
         self,
-        data_train: tf.data.Dataset,
-        data_test: tf.data.Dataset,
+        name: str,
         input_shape: tuple,
-        name: str = "defense_reformer",
+        data_train: tf.data.Dataset = None,
+        data_test: tf.data.Dataset = None,
         optimizer: keras.optimizers.Optimizer = keras.optimizers.Adam(),
         loss: keras.losses.Loss = keras.losses.MeanSquaredError(),
         accuracy: keras.metrics.Accuracy = keras.metrics.SparseCategoricalAccuracy(
