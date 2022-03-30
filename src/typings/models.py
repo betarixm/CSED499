@@ -106,17 +106,20 @@ class Model(ABC):
     def load(self):
         self.__model.load_weights(self.checkpoint_filepath)
 
+    def compile(self):
+        self.__model.compile(
+            optimizer=self.optimizer,
+            loss=self.loss,
+            metrics=[self.accuracy],
+        )
+
     def predict(self, inputs):
         return self.__model.predict(inputs)
 
     def train(self, epochs: int = 100):
         self.pre_train()
 
-        self.__model.compile(
-            optimizer=self.optimizer,
-            loss=self.loss,
-            metrics=[self.accuracy],
-        )
+        self.compile()
 
         try:
             self.__model.load_weights(self.checkpoint_filepath)
