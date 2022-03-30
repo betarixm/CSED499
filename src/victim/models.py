@@ -8,7 +8,7 @@ import tensorflow as tf
 keras = tf.keras
 
 
-class Mnist(Model):
+class Classifier(Model):
     def __init__(
         self,
         data_train: tf.data.Dataset,
@@ -61,5 +61,5 @@ class Mnist(Model):
 
 if __name__ == "__main__":
     train_set, test_set = MnistDataset().dataset()
-    mnist = Mnist(train_set, test_set, (28, 28, 1))
+    mnist = Classifier(train_set, test_set, (28, 28, 1))
     mnist.train()
