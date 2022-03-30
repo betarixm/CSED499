@@ -56,7 +56,7 @@ class Dataset(ABC):
             .batch(batch)
         )
 
-        test_ds = tf.data.Dataset.from_tensor_slices((x_test, y_test)).batch(32)
+        test_ds = tf.data.Dataset.from_tensor_slices((x_test, y_test)).batch(batch)
 
         return train_ds, test_ds
 
