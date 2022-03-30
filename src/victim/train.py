@@ -22,7 +22,6 @@ def train_cifar10_classifier(epochs: int = 100):
         test_set,
         (32, 32, 3),
         name="victim_classifier_cifar10",
-        accuracy=keras.metrics.CategoricalAccuracy(name="accuracy"),
     )
     reformer.train(epochs)
 
