@@ -1,9 +1,11 @@
 from abc import ABC, abstractmethod
 from typing import List
+from typings.dataset import Dataset
 
 import datetime
 
 import tensorflow as tf
+import numpy as np
 
 keras = tf.keras
 
@@ -141,3 +143,42 @@ class Model(ABC):
         self.__model.evaluate(self.data_test)
 
         self.post_train()
+
+
+class Attack(ABC):
+    def __init__(
+        self,
+        model: Model,
+        dataset: Dataset,
+        accuracy_normal: keras.metrics.Accuracy = tf.metrics.SparseCategoricalAccuracy(),
+        accuracy_under_attack: keras.metrics.Accuracy = tf.metrics.SparseCategoricalAccuracy(),
+    ):
+        self.model = model
+        self.dataset = dataset
+        self.accuracy_normal = accuracy_normal
+        self.accuracy_under_attack = accuracy_under_attack
+
+        self.model.compile()
+        self.model.load()
+
+    @abstractmethod
+    def add_perturbation(self, x: np.array) -> np.array:
+        pass
+
+    def attack(self):
+        _, test = self.dataset.dataset()
+
+        progress = keras.utils.Progbar(test.cardinality().numpy())
+
+        for x, y in test:
+            x_attack = self.add_perturbation(x)
+
+            y_attack = self.model.predict(x_attack)
+            y_normal = self.model.predict(x)
+
+            self.accuracy_under_attack(y, y_attack)
+            self.accuracy_normal(y, y_normal)
+
+            progress.add(1)
+
+        return self.accuracy_under_attack, self.accuracy_normal
