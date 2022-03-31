@@ -14,9 +14,9 @@ class Model(ABC):
     def __init__(
         self,
         name: str,
+        input_shape: tuple,
         data_train: tf.data.Dataset = None,
         data_test: tf.data.Dataset = None,
-        input_shape: tuple = None,
         optimizer: keras.optimizers.Optimizer = keras.optimizers.Adam(),
         loss: keras.losses.Loss = keras.losses.SparseCategoricalCrossentropy(
             from_logits=True

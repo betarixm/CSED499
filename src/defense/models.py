@@ -8,30 +8,6 @@ keras = tf.keras
 
 
 class Reformer(Model):
-    def __init__(
-        self,
-        name: str,
-        input_shape: tuple,
-        data_train: tf.data.Dataset = None,
-        data_test: tf.data.Dataset = None,
-        optimizer: keras.optimizers.Optimizer = keras.optimizers.Adam(),
-        loss: keras.losses.Loss = keras.losses.MeanSquaredError(),
-        accuracy: keras.metrics.Accuracy = keras.metrics.SparseCategoricalAccuracy(
-            name="accuracy"
-        ),
-        checkpoint_filepath: str = None,
-    ):
-        super().__init__(
-            name,
-            data_train,
-            data_test,
-            input_shape,
-            optimizer,
-            loss,
-            accuracy,
-            checkpoint_filepath,
-        )
-
     def _model(self) -> keras.Model:
         def layer_conv2d():
             return keras.layers.Conv2D(
