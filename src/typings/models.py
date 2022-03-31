@@ -165,6 +165,10 @@ class Attack(ABC):
         self.victim_model.compile()
         self.victim_model.load()
 
+        if defense_model is not None:
+            self.defense_model.compile()
+            self.defense_model.load()
+
     @abstractmethod
     def add_perturbation(self, x: np.array) -> np.array:
         pass
