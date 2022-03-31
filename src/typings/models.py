@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import List
+from typing import List, Tuple, Optional
 from typings.dataset import Dataset
 
 import datetime
@@ -148,24 +148,30 @@ class Model(ABC):
 class Attack(ABC):
     def __init__(
         self,
-        model: Model,
+        victim_model: Model,
         dataset: Dataset,
+        defense_model: Model = None,
         accuracy_normal: keras.metrics.Accuracy = tf.metrics.SparseCategoricalAccuracy(),
         accuracy_under_attack: keras.metrics.Accuracy = tf.metrics.SparseCategoricalAccuracy(),
+        accuracy_with_defense: keras.metrics.Accuracy = tf.metrics.SparseCategoricalAccuracy(),
     ):
-        self.model = model
-        self.dataset = dataset
-        self.accuracy_normal = accuracy_normal
-        self.accuracy_under_attack = accuracy_under_attack
+        self.victim_model: Model = victim_model
+        self.defense_model: Model = defense_model
+        self.dataset: Dataset = dataset
+        self.accuracy_normal: tf.metrics.Accuracy = accuracy_normal
+        self.accuracy_under_attack: tf.metrics.Accuracy = accuracy_under_attack
+        self.accuracy_with_defense: tf.metrics.Accuracy = accuracy_with_defense
 
-        self.model.compile()
-        self.model.load()
+        self.victim_model.compile()
+        self.victim_model.load()
 
     @abstractmethod
     def add_perturbation(self, x: np.array) -> np.array:
         pass
 
-    def attack(self):
+    def attack(
+        self,
+    ) -> Tuple[tf.metrics.Accuracy, tf.metrics.Accuracy, Optional[tf.metrics.Accuracy]]:
         _, test = self.dataset.dataset()
 
         progress = keras.utils.Progbar(test.cardinality().numpy())
@@ -173,12 +179,20 @@ class Attack(ABC):
         for x, y in test:
             x_attack = self.add_perturbation(x)
 
-            y_attack = self.model.predict(x_attack)
-            y_normal = self.model.predict(x)
+            y_attack = self.victim_model.predict(x_attack)
+            y_normal = self.victim_model.predict(x)
 
             self.accuracy_under_attack(y, y_attack)
             self.accuracy_normal(y, y_normal)
 
+            if self.defense_model is not None:
+                self.accuracy_with_defense(
+                    y, self.victim_model.predict(self.defense_model.predict(x_attack))
+                )
             progress.add(1)
 
-        return self.accuracy_under_attack, self.accuracy_normal
+        return (
+            self.accuracy_normal,
+            self.accuracy_under_attack,
+            self.accuracy_with_defense,
+        )
