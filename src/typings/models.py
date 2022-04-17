@@ -18,9 +18,7 @@ class Model(ABC):
         data_train: tf.data.Dataset = None,
         data_test: tf.data.Dataset = None,
         optimizer: keras.optimizers.Optimizer = keras.optimizers.Adam(),
-        loss: keras.losses.Loss = keras.losses.SparseCategoricalCrossentropy(
-            from_logits=True
-        ),
+        loss: keras.losses.Loss = keras.losses.SparseCategoricalCrossentropy(),
         accuracy: keras.metrics.Accuracy = keras.metrics.SparseCategoricalAccuracy(
             name="accuracy"
         ),
