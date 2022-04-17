@@ -134,6 +134,7 @@ class Model(ABC):
             callbacks=[
                 self.checkpoint_callback,
                 self.tensorboard_callback,
+                keras.callbacks.EarlyStopping(monitor="loss", patience=5),
                 *self.custom_callbacks(),
             ],
         )
