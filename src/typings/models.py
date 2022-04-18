@@ -139,9 +139,12 @@ class Model(ABC):
             ],
         )
 
-        self.__model.evaluate(self.data_test)
-
         self.post_train()
+
+    def evaluate(self):
+        self.load()
+        result = self.__model.evaluate(self.data_test)
+        return dict(zip(self.__model.metrics_names, result))
 
 
 class Attack(ABC):
