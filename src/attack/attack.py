@@ -1,5 +1,5 @@
 from typings.models import Attack
-from models import Fgsm
+from models import Fgsm, Pgd
 from defense.models import Reformer
 from victim.models import Classifier
 
@@ -27,6 +27,16 @@ if __name__ == "__main__":
     )
 
     parser.add_argument(
+        "--method",
+        "-m",
+        metavar="METHOD",
+        type=str,
+        help="Attack method",
+        required=True,
+        choices=["fgsm", "pgd"],
+    )
+
+    parser.add_argument(
         "--defense",
         "-f",
         help="Use defense model",
@@ -35,26 +45,43 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    a: Attack
+    attacker: Attack
+    attack_cls: Attack.__class__
 
     if args.dataset == "mnist":
-        a = Fgsm(
+        classifier = (
             Classifier(name="victim_classifier_mnist", input_shape=(28, 28, 1)),
-            Mnist(),
-            defense_model=Reformer("defense_reformer_mnist", input_shape=(28, 28, 1))
-            if args.defense
-            else None,
         )
-    elif args.dataset == "cifar10":
-        a = Fgsm(
-            Classifier(name="victim_classifier_cifar10", input_shape=(32, 32, 3)),
-            Cifar10(),
-            defense_model=Reformer("defense_reformer_cifar10", input_shape=(32, 32, 3))
+
+        dataset = Mnist()
+
+        defense_model = (
+            Reformer("defense_reformer_mnist", input_shape=(28, 28, 1))
+            if args.defense
+            else None
+        )
+
+    else:
+        classifier = Classifier(
+            name="victim_classifier_cifar10", input_shape=(32, 32, 3)
+        )
+
+        dataset = Cifar10()
+
+        defense_model = (
+            Reformer("defense_reformer_cifar10", input_shape=(32, 32, 3))
             if args.defense
             else None,
         )
 
-    acc, acc_under_attack, acc_with_defense = a.attack()
+    if args.method == "fgsm":
+        attack_cls = Fgsm
+    else:
+        attack_cls = Pgd
+
+    attacker = attack_cls(classifier, dataset, defense_model)
+
+    acc, acc_under_attack, acc_with_defense = attacker.attack()
 
     print(f"[*] Attack {args.dataset.upper()} {'with defense' if args.defense else ''}")
     print(f"    - Normal:       {acc.result()}")
