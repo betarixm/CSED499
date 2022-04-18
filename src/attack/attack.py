@@ -83,7 +83,9 @@ if __name__ == "__main__":
 
     acc, acc_under_attack, acc_with_defense = attacker.attack()
 
-    print(f"[*] Attack {args.dataset.upper()} {'with defense' if args.defense else ''}")
+    print(
+        f"[*] Attack {args.dataset.upper()} by {args.method.upper()} {'with defense' if args.defense else ''}"
+    )
     print(f"    - Normal:       {acc.result()}")
     print(f"    - Under Attack: {acc_under_attack.result()}")
 
