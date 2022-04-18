@@ -2,6 +2,7 @@ from typings.models import Attack
 
 from cleverhans.tf2.attacks.fast_gradient_method import fast_gradient_method
 from cleverhans.tf2.attacks.projected_gradient_descent import projected_gradient_descent
+from cleverhans.tf2.attacks.carlini_wagner_l2 import carlini_wagner_l2
 
 import numpy as np
 import tensorflow as tf
@@ -24,3 +25,8 @@ class Pgd(Attack):
             40,
             np.inf,
         )
+
+
+class Cw(Attack):
+    def add_perturbation(self, x: np.array) -> np.array:
+        return carlini_wagner_l2(self.victim_model.model(), x)

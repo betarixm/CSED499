@@ -1,5 +1,5 @@
 from typings.models import Attack
-from models import Fgsm, Pgd
+from models import Fgsm, Pgd, Cw
 from defense.models import Reformer
 from victim.models import Classifier
 
@@ -33,7 +33,7 @@ if __name__ == "__main__":
         type=str,
         help="Attack method",
         required=True,
-        choices=["fgsm", "pgd"],
+        choices=["fgsm", "pgd", "cw"],
     )
 
     parser.add_argument(
@@ -74,8 +74,10 @@ if __name__ == "__main__":
 
     if args.method == "fgsm":
         attack_cls = Fgsm
-    else:
+    elif args.method == "pgd":
         attack_cls = Pgd
+    else:
+        attack_cls = Cw
 
     attacker = attack_cls(classifier, dataset, defense_model)
 
