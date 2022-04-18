@@ -20,13 +20,13 @@ def train_mnist_classifier(epochs: int = 100):
 
 def train_cifar10_classifier(epochs: int = 100):
     train_set, test_set = Cifar10().dataset()
-    reformer = Classifier(
+    classifier = Classifier(
         "victim_classifier_cifar10",
         (32, 32, 3),
         train_set,
         test_set,
     )
-    reformer.train(epochs)
+    classifier.train(epochs)
 
 
 if __name__ == "__main__":
