@@ -19,8 +19,8 @@ class Pgd(Attack):
         return projected_gradient_descent(
             self.victim_model.model(),
             tf.cast(x, tf.float32),
-            8 / 255,
-            1 / 255,
-            10,
+            0.3,
+            0.01,
+            40,
             np.inf,
         )
