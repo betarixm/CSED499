@@ -17,5 +17,10 @@ class Fgsm(Attack):
 class Pgd(Attack):
     def add_perturbation(self, x: np.array) -> np.array:
         return projected_gradient_descent(
-            self.victim_model.model(), x, 0.05, 0.01, 40, np.inf
+            self.victim_model.model(),
+            tf.cast(x, tf.float32),
+            8 / 255,
+            1 / 255,
+            10,
+            np.inf,
         )
