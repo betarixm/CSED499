@@ -142,6 +142,7 @@ class Model(ABC):
         self.post_train()
 
     def evaluate(self):
+        self.compile()
         self.load()
         result = self.__model.evaluate(self.data_test)
         return dict(zip(self.__model.metrics_names, result))
