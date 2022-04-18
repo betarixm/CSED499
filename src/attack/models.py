@@ -29,4 +29,4 @@ class Pgd(Attack):
 
 class Cw(Attack):
     def add_perturbation(self, x: np.array) -> np.array:
-        return carlini_wagner_l2(self.victim_model.model(), x)
+        return carlini_wagner_l2(self.victim_model.model(), tf.cast(x, tf.float32))
