@@ -71,7 +71,7 @@ if __name__ == "__main__":
         defense_model = (
             Reformer("defense_reformer_cifar10", input_shape=(32, 32, 3))
             if args.defense
-            else None,
+            else None
         )
 
     if args.method == "fgsm":
