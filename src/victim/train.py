@@ -60,6 +60,10 @@ if __name__ == "__main__":
         )
 
     if args.evaluate:
-        print(classifier.evaluate())
+        result = classifier.evaluate()
+        print(f"[*] Evaluation of {args.dataset.upper()} Classifier")
+        for key in result:
+            print(f"    - {key}: {result[key]}")
+
     else:
         classifier.train(e)
