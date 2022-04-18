@@ -49,9 +49,7 @@ if __name__ == "__main__":
     attack_cls: Attack.__class__
 
     if args.dataset == "mnist":
-        classifier = (
-            Classifier(name="victim_classifier_mnist", input_shape=(28, 28, 1)),
-        )
+        classifier = Classifier(name="victim_classifier_mnist", input_shape=(28, 28, 1))
 
         dataset = Mnist()
 
