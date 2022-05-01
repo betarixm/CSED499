@@ -1,6 +1,7 @@
-from typings.models import Attack
+from typing import Tuple, Union
+from typings.models import Attack, Model
 from models import Fgsm, Pgd, Cw
-from defense.models import Reformer
+from defense.models import Reformer, Denoiser
 from victim.models import Classifier
 
 from utils.dataset import Mnist, Cifar10
@@ -39,38 +40,33 @@ if __name__ == "__main__":
     parser.add_argument(
         "--defense",
         "-f",
-        help="Use defense model",
-        action="store_true",
+        metavar="DEFENSE",
+        type=str,
+        help="Defense method",
+        required=True,
+        choices=["reformer", "denoiser", "none"],
     )
 
     args = parser.parse_args()
 
     attacker: Attack
+    input_shape: Tuple[int, int, int]
     attack_cls: Attack.__class__
+    defense_model: Union[Model, None]
 
     if args.dataset == "mnist":
-        classifier = Classifier(name="victim_classifier_mnist", input_shape=(28, 28, 1))
+        input_shape = (28, 28, 1)
+        classifier = Classifier(name="victim_classifier_mnist", input_shape=input_shape)
 
         dataset = Mnist()
 
-        defense_model = (
-            Reformer("defense_reformer_mnist", input_shape=(28, 28, 1))
-            if args.defense
-            else None
-        )
-
     else:
+        input_shape = (32, 32, 3)
         classifier = Classifier(
-            name="victim_classifier_cifar10", input_shape=(32, 32, 3)
+            name="victim_classifier_cifar10", input_shape=input_shape
         )
 
         dataset = Cifar10()
-
-        defense_model = (
-            Reformer("defense_reformer_cifar10", input_shape=(32, 32, 3))
-            if args.defense
-            else None
-        )
 
     if args.method == "fgsm":
         attack_cls = Fgsm
@@ -78,6 +74,13 @@ if __name__ == "__main__":
         attack_cls = Pgd
     else:
         attack_cls = Cw
+
+    if args.defense == "reformer":
+        defense_model = Reformer("defense_reformer_mnist", input_shape=input_shape)
+    elif args.defense == "denoiser":
+        defense_model = Denoiser("defense_denoiser_mnist", input_shape=input_shape)
+    else:
+        defense_model = None
 
     attacker = attack_cls(classifier, dataset, defense_model)
 
