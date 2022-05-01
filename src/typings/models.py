@@ -181,7 +181,10 @@ class Attack(ABC):
     ) -> Tuple[tf.metrics.Accuracy, tf.metrics.Accuracy, Optional[tf.metrics.Accuracy]]:
         _, test = self.dataset.dataset()
 
-        progress = keras.utils.Progbar(test.cardinality().numpy())
+        metrics = ["acc_normal", "acc_under_attack", "acc_with_defense"]
+        progress = keras.utils.Progbar(
+            test.cardinality().numpy(), stateful_metrics=metrics
+        )
 
         for x, y in test:
             x_attack = self.add_perturbation(x)
@@ -196,7 +199,17 @@ class Attack(ABC):
                 self.accuracy_with_defense(
                     y, self.victim_model.predict(self.defense_model.predict(x_attack))
                 )
-            progress.add(1)
+            progress.add(
+                1,
+                values=zip(
+                    metrics,
+                    [
+                        self.accuracy_normal.result(),
+                        self.accuracy_under_attack.result(),
+                        self.accuracy_with_defense.result(),
+                    ],
+                ),
+            )
 
         return (
             self.accuracy_normal,
