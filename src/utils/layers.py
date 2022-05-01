@@ -28,6 +28,9 @@ class SlqLayer(keras.layers.Layer):
 
             n, m, c = image.shape
 
+            if c == 1:
+                image = tf.image.grayscale_to_rgb(image)
+
             patch_n = tf.cast(n / self.patch_size, dtype=tf.int32) + tf.cond(
                 tf.constant(n % self.patch_size > 0, tf.bool),
                 lambda: one,
@@ -72,8 +75,13 @@ class SlqLayer(keras.layers.Layer):
                 name="compressed_images",
             )
 
-            return keras.layers.experimental.preprocessing.Rescaling(1.0 / 255)(
+            result = keras.layers.experimental.preprocessing.Rescaling(1.0 / 255)(
                 tf.gather_nd(x_compressed_stack, indices, name="final_image")
             )
+
+            if c == 1:
+                result = tf.image.rgb_to_grayscale(result)
+
+            return result
 
         return tf.map_fn(fn=compress, elems=inputs)
