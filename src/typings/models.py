@@ -104,7 +104,10 @@ class Model(ABC):
         return self._file_writer
 
     def load(self):
-        self.__model.load_weights(self.checkpoint_filepath)
+        try:
+            self.__model.load_weights(self.checkpoint_filepath)
+        except tf.errors.NotFoundError:
+            pass
 
     def compile(self):
         self.__model.compile(
@@ -121,10 +124,7 @@ class Model(ABC):
 
         self.compile()
 
-        try:
-            self.__model.load_weights(self.checkpoint_filepath)
-        except tf.errors.NotFoundError:
-            pass
+        self.load()
 
         self.__model.summary()
         self.__model.fit(
