@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Literal
 from typings.models import Model
 from utils.layers import SlqLayer
 
@@ -60,6 +60,38 @@ class Reformer(Model):
 class Denoiser(Model):
     def _model(self) -> keras.Model:
         return keras.Sequential([SlqLayer()])
+
+    def pre_train(self):
+        pass
+
+    def post_train(self):
+        pass
+
+    def custom_callbacks(self) -> List[keras.callbacks.Callback]:
+        pass
+
+
+class Motd(Model):
+    def __init__(
+        self,
+        name: str,
+        input_shape: tuple,
+        dataset: Literal["mnist", "cifar10"],
+        **kwargs,
+    ):
+        self.reformer = Reformer(f"defense_reformer_{dataset}", input_shape=input_shape)
+        self.denoiser = Denoiser(f"defense_denoiser_{dataset}", input_shape=input_shape)
+
+        super().__init__(name, input_shape, **kwargs)
+
+    def _model(self) -> keras.Model:
+        self.reformer.compile()
+        self.reformer.load()
+
+        return keras.Model(
+            self.denoiser.model().inputs,
+            self.reformer.model()(self.denoiser.model().outputs),
+        )
 
     def pre_train(self):
         pass

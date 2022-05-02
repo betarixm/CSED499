@@ -1,7 +1,7 @@
 from typing import Tuple, Union
 from typings.models import Attack, Model
 from models import Fgsm, Pgd, Cw
-from defense.models import Reformer, Denoiser
+from defense.models import Reformer, Denoiser, Motd
 from victim.models import Classifier
 
 from utils.dataset import Mnist, Cifar10
@@ -44,7 +44,7 @@ if __name__ == "__main__":
         type=str,
         help="Defense method",
         required=True,
-        choices=["reformer", "denoiser", "none"],
+        choices=["reformer", "denoiser", "motd", "none"],
     )
 
     args = parser.parse_args()
@@ -82,6 +82,12 @@ if __name__ == "__main__":
     elif args.defense == "denoiser":
         defense_model = Denoiser(
             f"defense_denoiser_{args.dataset}", input_shape=input_shape
+        )
+    elif args.defense == "motd":
+        defense_model = Motd(
+            f"defense_motd_{args.dataset}",
+            input_shape=input_shape,
+            dataset=args.dataset,
         )
     else:
         defense_model = None
