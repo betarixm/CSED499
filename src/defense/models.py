@@ -1,7 +1,7 @@
 from typing import List, Literal
 from typings.models import Model
 from utils.layers import SlqLayer
-from utils.logging import plot_to_image, batch_image_grid
+from utils.logging import concat_batch_images
 
 import numpy as np
 import tensorflow as tf
@@ -168,13 +168,13 @@ if __name__ == "__main__":
 
             tf.summary.image(
                 f"(Defense) Original images",
-                plot_to_image(batch_image_grid(x)),
+                concat_batch_images(x),
                 step=idx,
             )
 
             tf.summary.image(
                 f"(Defense) {args.defense.upper()} processing result",
-                plot_to_image(batch_image_grid(y)),
+                concat_batch_images(y),
                 step=idx,
             )
 
