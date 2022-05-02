@@ -159,8 +159,10 @@ if __name__ == "__main__":
     progress = keras.utils.Progbar(test_set.take(1).cardinality().numpy())
 
     with defense_model.tensorboard_file_writer().as_default():
-        for idx, (x, _) in enumerate(test_set.take(1)):
+        for idx, (x, _) in enumerate(test_set):
             y = defense_model.predict(x)
-            tf.summary.image(f"{args.defense.upper()} result - {idx}", [x, y])
+            tf.summary.image(
+                f"{args.defense.upper()} processing result", [x, y], step=idx
+            )
 
             progress.add(1)
