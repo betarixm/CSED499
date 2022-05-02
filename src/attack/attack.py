@@ -92,5 +92,5 @@ if __name__ == "__main__":
     print(f"    - Normal:       {acc.result()}")
     print(f"    - Under Attack: {acc_under_attack.result()}")
 
-    if args.defense:
-        print(f"    - With Defense: {acc_with_defense.result()}")
+    if defense_model is not None:
+        print(f"    - With {args.defense.upper()}: {acc_with_defense.result()}")
