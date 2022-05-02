@@ -76,9 +76,13 @@ if __name__ == "__main__":
         attack_cls = Cw
 
     if args.defense == "reformer":
-        defense_model = Reformer("defense_reformer_mnist", input_shape=input_shape)
+        defense_model = Reformer(
+            f"defense_reformer_{args.dataset}", input_shape=input_shape
+        )
     elif args.defense == "denoiser":
-        defense_model = Denoiser("defense_denoiser_mnist", input_shape=input_shape)
+        defense_model = Denoiser(
+            f"defense_denoiser_{args.dataset}", input_shape=input_shape
+        )
     else:
         defense_model = None
 
