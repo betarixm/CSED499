@@ -156,7 +156,7 @@ if __name__ == "__main__":
             dataset=args.dataset,
         )
 
-    progress = keras.utils.Progbar(test_set.take(1).cardinality().numpy())
+    progress = keras.utils.Progbar(test_set.cardinality().numpy())
 
     with defense_model.tensorboard_file_writer().as_default():
         for idx, (x, _) in enumerate(test_set):
