@@ -1,6 +1,7 @@
 from typing import List, Literal
 from typings.models import Model
 from utils.layers import SlqLayer
+from utils.logging import plot_to_image, batch_image_grid
 
 import numpy as np
 import tensorflow as tf
@@ -165,10 +166,16 @@ if __name__ == "__main__":
         for idx, (x, _) in enumerate(test_set):
             y = defense_model.predict(x)
 
-            tf.summary.image(f"(Defense) Original images", x, step=idx)
+            tf.summary.image(
+                f"(Defense) Original images",
+                plot_to_image(batch_image_grid(x)),
+                step=idx,
+            )
 
             tf.summary.image(
-                f"(Defense) {args.defense.upper()} processing result", y, step=idx
+                f"(Defense) {args.defense.upper()} processing result",
+                plot_to_image(batch_image_grid(y)),
+                step=idx,
             )
 
             progress.add(1)
