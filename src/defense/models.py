@@ -156,6 +156,9 @@ if __name__ == "__main__":
             dataset=args.dataset,
         )
 
+    defense_model.compile()
+    defense_model.load()
+
     progress = keras.utils.Progbar(test_set.cardinality().numpy())
 
     with defense_model.tensorboard_file_writer().as_default():
