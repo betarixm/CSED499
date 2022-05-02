@@ -162,7 +162,9 @@ if __name__ == "__main__":
 
     progress = keras.utils.Progbar(test_set.cardinality().numpy())
 
-    with defense_model.tensorboard_file_writer().as_default():
+    with tf.summary.create_file_writer(
+        f"./logs/defense_processing_result"
+    ).as_default():
         for idx, (x, _) in enumerate(test_set):
             y = defense_model.predict(x)
 
