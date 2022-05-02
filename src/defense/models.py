@@ -169,13 +169,13 @@ if __name__ == "__main__":
             y = defense_model.predict(x)
 
             tf.summary.image(
-                f"(Defense)[{args.dataset}] Original images",
+                f"(Defense)[{args.dataset.upper()}] Original images",
                 concat_batch_images(x),
                 step=idx,
             )
 
             tf.summary.image(
-                f"(Defense)[{args.dataset}] {args.defense.upper()} processing result",
+                f"(Defense)[{args.dataset.upper()}] {args.defense.upper()} processing result",
                 concat_batch_images(y),
                 step=idx,
             )
