@@ -8,7 +8,9 @@ def concat_batch_images(batch_images: np.array):
         np.concatenate(
             [
                 np.concatenate(i, axis=1)
-                for i in batch_images.reshape(-1, width, *batch_images.shape[1:])
+                for i in np.array(batch_images).reshape(
+                    -1, width, *batch_images.shape[1:]
+                )
             ],
             axis=0,
         ),
