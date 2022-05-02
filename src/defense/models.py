@@ -161,8 +161,11 @@ if __name__ == "__main__":
     with defense_model.tensorboard_file_writer().as_default():
         for idx, (x, _) in enumerate(test_set):
             y = defense_model.predict(x)
+
+            tf.summary.image(f"(Defense) Original images", x, step=idx)
+
             tf.summary.image(
-                f"{args.defense.upper()} processing result", [x, y], step=idx
+                f"(Defense) {args.defense.upper()} processing result", y, step=idx
             )
 
             progress.add(1)
