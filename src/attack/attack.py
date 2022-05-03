@@ -47,6 +47,16 @@ if __name__ == "__main__":
         choices=["reformer", "denoiser", "motd", "none"],
     )
 
+    parser.add_argument(
+        "--intensity",
+        "-i",
+        metavar="INTENSITY",
+        type=float,
+        help="Intensity of processing",
+        required=True,
+        nargs="+",
+    )
+
     args = parser.parse_args()
 
     attacker: Attack
@@ -77,17 +87,22 @@ if __name__ == "__main__":
 
     if args.defense == "reformer":
         defense_model = Reformer(
-            f"defense_reformer_{args.dataset}", input_shape=input_shape
+            f"defense_reformer_{args.dataset}",
+            input_shape=input_shape,
+            intensity=args.intensity[0],
         )
     elif args.defense == "denoiser":
         defense_model = Denoiser(
-            f"defense_denoiser_{args.dataset}", input_shape=input_shape
+            f"defense_denoiser_{args.dataset}",
+            input_shape=input_shape,
+            intensity=args.intensity[0],
         )
     elif args.defense == "motd":
         defense_model = Motd(
             f"defense_motd_{args.dataset}",
             input_shape=input_shape,
             dataset=args.dataset,
+            intensities=args.intensity,
         )
     else:
         defense_model = None
@@ -103,4 +118,6 @@ if __name__ == "__main__":
     print(f"    - Under Attack: {acc_under_attack.result()}")
 
     if defense_model is not None:
-        print(f"    - With {args.defense.upper()}: {acc_with_defense.result()}")
+        print(
+            f"    - With {args.defense.upper()} ({', '.join([str(_) for _ in args.intensity])}): {acc_with_defense.result()}"
+        )

@@ -216,3 +216,15 @@ class Attack(ABC):
             self.accuracy_under_attack,
             self.accuracy_with_defense,
         )
+
+
+class Defense(Model, ABC):
+    def __init__(
+        self, name: str, input_shape: tuple, intensity: float = 1.0, *args, **kwargs
+    ):
+        super().__init__(name, input_shape, *args, **kwargs)
+        self.intensity = np.clip(intensity, 0, 1)
+
+    def predict(self, inputs):
+        outs = super(Defense, self).predict(inputs)
+        return inputs + (outs - inputs) * self.intensity if self.intensity < 1 else outs

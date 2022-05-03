@@ -1,5 +1,5 @@
-from typing import List, Literal
-from typings.models import Model
+from typing import List, Literal, Tuple
+from typings.models import Defense
 from utils.layers import SlqLayer
 from utils.logging import concat_batch_images
 
@@ -9,7 +9,7 @@ import tensorflow as tf
 keras = tf.keras
 
 
-class Reformer(Model):
+class Reformer(Defense):
     def _model(self) -> keras.Model:
         def layer_conv2d():
             return keras.layers.Conv2D(
@@ -58,7 +58,7 @@ class Reformer(Model):
         return [keras.callbacks.LambdaCallback(on_epoch_end=predict)]
 
 
-class Denoiser(Model):
+class Denoiser(Defense):
     def _model(self) -> keras.Model:
         return keras.Sequential([SlqLayer()])
 
@@ -72,16 +72,25 @@ class Denoiser(Model):
         pass
 
 
-class Motd(Model):
+class Motd(Defense):
     def __init__(
         self,
         name: str,
         input_shape: tuple,
         dataset: Literal["mnist", "cifar10"],
+        intensities: Tuple[float, float] = (1.0, 1.0),
         **kwargs,
     ):
-        self.reformer = Reformer(f"defense_reformer_{dataset}", input_shape=input_shape)
-        self.denoiser = Denoiser(f"defense_denoiser_{dataset}", input_shape=input_shape)
+        self.denoiser = Denoiser(
+            f"defense_denoiser_{dataset}",
+            input_shape=input_shape,
+            intensity=intensities[0],
+        )
+        self.reformer = Reformer(
+            f"defense_reformer_{dataset}",
+            input_shape=input_shape,
+            intensity=intensities[1],
+        )
 
         super().__init__(name, input_shape, **kwargs)
 
@@ -132,6 +141,16 @@ if __name__ == "__main__":
         choices=["reformer", "denoiser", "motd"],
     )
 
+    parser.add_argument(
+        "--intensity",
+        "-i",
+        metavar="INTENSITY",
+        type=float,
+        help="Intensity of processing",
+        required=True,
+        nargs="+",
+    )
+
     args = parser.parse_args()
 
     if args.dataset == "mnist":
@@ -144,17 +163,22 @@ if __name__ == "__main__":
 
     if args.defense == "reformer":
         defense_model = Reformer(
-            f"defense_reformer_{args.dataset}", input_shape=input_shape
+            f"defense_reformer_{args.dataset}",
+            input_shape=input_shape,
+            intensity=args.intensity[0],
         )
     elif args.defense == "denoiser":
         defense_model = Denoiser(
-            f"defense_denoiser_{args.dataset}", input_shape=input_shape
+            f"defense_denoiser_{args.dataset}",
+            input_shape=input_shape,
+            intensity=args.intensity[0],
         )
     else:
         defense_model = Motd(
             f"defense_motd_{args.dataset}",
             input_shape=input_shape,
             dataset=args.dataset,
+            intensities=args.intensity,
         )
 
     defense_model.compile()
@@ -175,7 +199,7 @@ if __name__ == "__main__":
             )
 
             tf.summary.image(
-                f"(Defense)[{args.dataset.upper()}] {args.defense.upper()} processing result",
+                f"(Defense)[{args.dataset.upper()}-{'-'.join([str(_) for _ in args.intensity])}] {args.defense.upper()} processing result",
                 concat_batch_images(y),
                 step=idx,
             )
