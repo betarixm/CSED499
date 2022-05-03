@@ -199,7 +199,7 @@ if __name__ == "__main__":
             )
 
             tf.summary.image(
-                f"(Defense)[{args.dataset.upper()}-{'-'.join([str(_) for _ in args.intensity])}] {args.defense.upper()} processing result",
+                f"(Defense)[{args.dataset.upper()}] {args.defense.upper()} ({', '.join([str(_) for _ in args.intensity])}) processing result",
                 concat_batch_images(y),
                 step=idx,
             )
