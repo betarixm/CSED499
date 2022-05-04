@@ -1,6 +1,7 @@
 from typing import List, Literal, Tuple
 from typings.models import Defense
 from utils.layers import SlqLayer
+from utils.models import SequentialInternalModel
 
 import numpy as np
 import tensorflow as tf
@@ -98,10 +99,7 @@ class Motd(Defense):
         self.reformer.compile()
         self.reformer.load()
 
-        return keras.Model(
-            self.denoiser.model().inputs,
-            self.reformer.model()(self.denoiser.model().outputs),
-        )
+        return SequentialInternalModel(models=[self.denoiser, self.reformer])
 
     def pre_train(self):
         pass
