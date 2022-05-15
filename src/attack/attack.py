@@ -1,6 +1,6 @@
 from typing import Tuple, Union
 from typings.models import Attack, Model
-from models import Fgsm, Pgd, Cw
+from models import FgsmMnist, FgsmCifar, PgdMnist, PgdCifar, Cw
 from defense.models import Reformer, Denoiser, Motd
 from victim.models import Classifier
 
@@ -79,9 +79,9 @@ if __name__ == "__main__":
         dataset = Cifar10()
 
     if args.method == "fgsm":
-        attack_cls = Fgsm
+        attack_cls = FgsmMnist if args.dataset == "mnist" else FgsmCifar
     elif args.method == "pgd":
-        attack_cls = Pgd
+        attack_cls = PgdMnist if args.dataset == "mnist" else PgdCifar
     else:
         attack_cls = Cw
 

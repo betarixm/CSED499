@@ -10,18 +10,35 @@ import tensorflow as tf
 keras = tf.keras
 
 
-class Fgsm(Attack):
+class FgsmMnist(Attack):
     def add_perturbation(self, x: np.array) -> np.array:
         return fast_gradient_method(self.victim_model.model(), x, 0.3, np.inf)
 
 
-class Pgd(Attack):
+class FgsmCifar(Attack):
+    def add_perturbation(self, x: np.array) -> np.array:
+        return fast_gradient_method(self.victim_model.model(), x, 16 / 255, np.inf)
+
+
+class PgdMnist(Attack):
     def add_perturbation(self, x: np.array) -> np.array:
         return projected_gradient_descent(
             self.victim_model.model(),
             tf.cast(x, tf.float32),
             0.3,
             0.01,
+            40,
+            np.inf,
+        )
+
+
+class PgdCifar(Attack):
+    def add_perturbation(self, x: np.array) -> np.array:
+        return projected_gradient_descent(
+            self.victim_model.model(),
+            tf.cast(x, tf.float32),
+            16 / 255,
+            1 / 255,
             40,
             np.inf,
         )
