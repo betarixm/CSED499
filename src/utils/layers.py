@@ -71,7 +71,7 @@ class CwLayer(keras.layers.Layer):
 
     def call(self, inputs, *args, **kwargs):
         return carlini_wagner_l2(
-            self.victim_model.model(),
+            self.victim_model,
             tf.cast(inputs, tf.float32),
             batch_size=self.batch_size,
             clip_min=self.clip_min,
