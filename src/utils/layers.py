@@ -1,6 +1,86 @@
+from cleverhans.tf2.attacks.fast_gradient_method import fast_gradient_method
+from cleverhans.tf2.attacks.projected_gradient_descent import projected_gradient_descent
+from cleverhans.tf2.attacks.carlini_wagner_l2 import carlini_wagner_l2
+
 import tensorflow as tf
 
 keras = tf.keras
+
+
+class FgsmLayer(keras.layers.Layer):
+    def __init__(self, victim_model: keras.Model, eps: float, norm: float, **kwargs):
+        super().__init__(**kwargs)
+        self.victim_model = victim_model
+        self.eps = eps
+        self.norm = norm
+
+    def call(self, inputs, *args, **kwargs):
+        return fast_gradient_method(self.victim_model, inputs, self.eps, self.norm)
+
+
+class PgdLayer(keras.layers.Layer):
+    def __init__(
+        self,
+        victim_model: keras.Model,
+        eps: float,
+        step: float,
+        batch_size: int,
+        norm: float,
+        **kwargs
+    ):
+        super().__init__(**kwargs)
+        self.victim_model: keras.Model = victim_model
+        self.eps: float = eps
+        self.step: float = step
+        self.batch_size: int = batch_size
+        self.norm: float = norm
+
+    def call(self, inputs, *args, **kwargs):
+        return projected_gradient_descent(
+            self.victim_model,
+            tf.cast(inputs, tf.float32),
+            self.eps,
+            self.step,
+            self.batch_size,
+            self.norm,
+        )
+
+
+class CwLayer(keras.layers.Layer):
+    def __init__(
+        self,
+        victim_model: keras.Model,
+        batch_size: int,
+        clip_min: float,
+        clip_max: float,
+        binary_search_steps: int,
+        max_iterations: int,
+        initial_const: int,
+        learning_rate: float,
+        **kwargs
+    ):
+        super().__init__(**kwargs)
+        self.victim_model: keras.Model = victim_model
+        self.batch_size: int = batch_size
+        self.clip_min: float = clip_min
+        self.clip_max: float = clip_max
+        self.binary_search_steps: int = binary_search_steps
+        self.max_iterations: int = max_iterations
+        self.initial_const: int = initial_const
+        self.learning_rate: float = learning_rate
+
+    def call(self, inputs, *args, **kwargs):
+        return carlini_wagner_l2(
+            self.victim_model.model(),
+            tf.cast(inputs, tf.float32),
+            batch_size=self.batch_size,
+            clip_min=self.clip_min,
+            clip_max=self.clip_max,
+            binary_search_steps=self.binary_search_steps,
+            max_iterations=self.max_iterations,
+            initial_const=self.initial_const,
+            learning_rate=self.learning_rate,
+        )
 
 
 class SlqLayer(keras.layers.Layer):
