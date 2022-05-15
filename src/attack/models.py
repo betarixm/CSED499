@@ -1,8 +1,6 @@
 from typings.models import Attack
+from utils.layers import FgsmLayer, PgdLayer, CwLayer
 
-from cleverhans.tf2.attacks.fast_gradient_method import fast_gradient_method
-from cleverhans.tf2.attacks.projected_gradient_descent import projected_gradient_descent
-from cleverhans.tf2.attacks.carlini_wagner_l2 import carlini_wagner_l2
 
 import numpy as np
 import tensorflow as tf
@@ -11,49 +9,60 @@ keras = tf.keras
 
 
 class FgsmMnist(Attack):
-    def add_perturbation(self, x: np.array) -> np.array:
-        return fast_gradient_method(self.victim_model.model(), x, 0.3, np.inf)
+    def _model(self) -> keras.Model:
+        return keras.Sequential([FgsmLayer(self.victim_model.model(), 0.3, np.inf)])
 
 
 class FgsmCifar(Attack):
-    def add_perturbation(self, x: np.array) -> np.array:
-        return fast_gradient_method(self.victim_model.model(), x, 16 / 255, np.inf)
+    def _model(self) -> keras.Model:
+        return keras.Sequential(
+            [FgsmLayer(self.victim_model.model(), 16 / 255, np.inf)]
+        )
 
 
 class PgdMnist(Attack):
-    def add_perturbation(self, x: np.array) -> np.array:
-        return projected_gradient_descent(
-            self.victim_model.model(),
-            tf.cast(x, tf.float32),
-            0.3,
-            0.01,
-            40,
-            np.inf,
+    def _model(self) -> keras.Model:
+        return keras.Sequential(
+            [
+                PgdLayer(
+                    self.victim_model.model(),
+                    0.3,
+                    0.01,
+                    40,
+                    np.inf,
+                )
+            ]
         )
 
 
 class PgdCifar(Attack):
-    def add_perturbation(self, x: np.array) -> np.array:
-        return projected_gradient_descent(
-            self.victim_model.model(),
-            tf.cast(x, tf.float32),
-            16 / 255,
-            1 / 255,
-            40,
-            np.inf,
+    def _model(self) -> keras.Model:
+        return keras.Sequential(
+            [
+                PgdLayer(
+                    self.victim_model.model(),
+                    16 / 255,
+                    1 / 255,
+                    40,
+                    np.inf,
+                )
+            ]
         )
 
 
 class Cw(Attack):
-    def add_perturbation(self, x: np.array) -> np.array:
-        return carlini_wagner_l2(
-            self.victim_model.model(),
-            tf.cast(x, tf.float32),
-            batch_size=32,
-            clip_min=0.0,
-            clip_max=1.0,
-            binary_search_steps=16,
-            max_iterations=1000,
-            initial_const=8,
-            learning_rate=0.05,
+    def _model(self) -> keras.Model:
+        return keras.Sequential(
+            [
+                CwLayer(
+                    self.victim_model.model(),
+                    batch_size=32,
+                    clip_min=0.0,
+                    clip_max=1.0,
+                    binary_search_steps=16,
+                    max_iterations=1000,
+                    initial_const=8,
+                    learning_rate=0.05,
+                )
+            ]
         )

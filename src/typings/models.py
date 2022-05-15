@@ -1,11 +1,9 @@
 from abc import ABC, abstractmethod
-from typing import List, Tuple, Optional
-from typings.dataset import Dataset
+from typing import List
 
 import datetime
 
 import tensorflow as tf
-import numpy as np
 
 keras = tf.keras
 
@@ -15,6 +13,7 @@ class Model(ABC):
         self,
         name: str,
         input_shape: tuple,
+        intensity: float = 1.0,
         data_train: tf.data.Dataset = None,
         data_test: tf.data.Dataset = None,
         optimizer: keras.optimizers.Optimizer = keras.optimizers.Adam(),
@@ -35,6 +34,8 @@ class Model(ABC):
         self.__model: keras.Model = keras.Sequential(
             [keras.Input(self.__input_shape), *self._model().layers], name=self._name
         )
+
+        self.intensity: float = intensity
 
         self.optimizer: keras.optimizers.Optimizer = optimizer
         self.loss: keras.losses.Loss = loss
@@ -79,15 +80,12 @@ class Model(ABC):
     def _model(self) -> keras.Model:
         pass
 
-    @abstractmethod
     def pre_train(self):
         pass
 
-    @abstractmethod
     def post_train(self):
         pass
 
-    @abstractmethod
     def custom_callbacks(self) -> List[keras.callbacks.Callback]:
         pass
 
@@ -117,7 +115,8 @@ class Model(ABC):
         )
 
     def predict(self, inputs):
-        return self.__model.predict(inputs)
+        outs = self.__model.predict(inputs)
+        return inputs + (outs - inputs) * self.intensity if self.intensity < 1 else outs
 
     def train(self, epochs: int = 100):
         self.pre_train()
@@ -148,83 +147,19 @@ class Model(ABC):
         return dict(zip(self.__model.metrics_names, result))
 
 
-class Attack(ABC):
+class Defense(Model, ABC):
+    pass
+
+
+class Attack(Model, ABC):
     def __init__(
         self,
+        name: str,
+        input_shape: tuple,
         victim_model: Model,
-        dataset: Dataset,
-        defense_model: Model = None,
-        accuracy_normal: keras.metrics.Accuracy = tf.metrics.SparseCategoricalAccuracy(),
-        accuracy_under_attack: keras.metrics.Accuracy = tf.metrics.SparseCategoricalAccuracy(),
-        accuracy_with_defense: keras.metrics.Accuracy = tf.metrics.SparseCategoricalAccuracy(),
+        intensity: float = 1.0,
+        *args,
+        **kwargs,
     ):
         self.victim_model: Model = victim_model
-        self.defense_model: Model = defense_model
-        self.dataset: Dataset = dataset
-        self.accuracy_normal: tf.metrics.Accuracy = accuracy_normal
-        self.accuracy_under_attack: tf.metrics.Accuracy = accuracy_under_attack
-        self.accuracy_with_defense: tf.metrics.Accuracy = accuracy_with_defense
-
-        self.victim_model.compile()
-        self.victim_model.load()
-
-        if defense_model is not None:
-            self.defense_model.compile()
-            self.defense_model.load()
-
-    @abstractmethod
-    def add_perturbation(self, x: np.array) -> np.array:
-        pass
-
-    def attack(
-        self,
-    ) -> Tuple[tf.metrics.Accuracy, tf.metrics.Accuracy, Optional[tf.metrics.Accuracy]]:
-        _, test = self.dataset.dataset()
-
-        metrics = ["acc_normal", "acc_under_attack", "acc_with_defense"]
-        progress = keras.utils.Progbar(
-            test.cardinality().numpy(), stateful_metrics=metrics
-        )
-
-        for x, y in test:
-            x_attack = self.add_perturbation(x)
-
-            y_attack = self.victim_model.predict(x_attack)
-            y_normal = self.victim_model.predict(x)
-
-            self.accuracy_under_attack(y, y_attack)
-            self.accuracy_normal(y, y_normal)
-
-            if self.defense_model is not None:
-                self.accuracy_with_defense(
-                    y, self.victim_model.predict(self.defense_model.predict(x_attack))
-                )
-            progress.add(
-                1,
-                values=zip(
-                    metrics,
-                    [
-                        self.accuracy_normal.result(),
-                        self.accuracy_under_attack.result(),
-                        self.accuracy_with_defense.result(),
-                    ],
-                ),
-            )
-
-        return (
-            self.accuracy_normal,
-            self.accuracy_under_attack,
-            self.accuracy_with_defense,
-        )
-
-
-class Defense(Model, ABC):
-    def __init__(
-        self, name: str, input_shape: tuple, intensity: float = 1.0, *args, **kwargs
-    ):
-        super().__init__(name, input_shape, *args, **kwargs)
-        self.intensity = np.clip(intensity, 0, 1)
-
-    def predict(self, inputs):
-        outs = super(Defense, self).predict(inputs)
-        return inputs + (outs - inputs) * self.intensity if self.intensity < 1 else outs
+        super().__init__(name, input_shape, intensity, *args, **kwargs)
