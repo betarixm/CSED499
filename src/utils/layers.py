@@ -73,13 +73,9 @@ class CwLayer(keras.layers.Layer):
         )
 
     def call(self, inputs, *args, **kwargs):
-        @tf.function(input_signature=[tf.TensorSpec(None, tf.float32)])
-        def f(x):
-            return tf.numpy_function(
-                self.carlini_wagner.attack, [tf.cast(x, tf.float32)], tf.float32
-            )
-
-        return f(inputs)
+        return tf.numpy_function(
+            self.carlini_wagner.attack, [tf.cast(inputs, tf.float32)], tf.float32
+        )
 
 
 class SlqLayer(keras.layers.Layer):
