@@ -31,8 +31,13 @@ class Model(ABC):
 
         self.__input_shape = input_shape
 
-        self.__model: keras.Model = keras.Sequential(
-            [keras.Input(self.__input_shape), *self._model().layers], name=self._name
+        self.__model: keras.Model = (
+            keras.Sequential(
+                [keras.Input(self.__input_shape), *self._model().layers],
+                name=self._name,
+            )
+            if len(self._model().layers) != 0
+            else self._model()
         )
 
         self.intensity: float = intensity
@@ -115,7 +120,7 @@ class Model(ABC):
         )
 
     def predict(self, inputs):
-        outs = self.__model.predict(inputs)
+        outs = self.__model(inputs)
         return inputs + (outs - inputs) * self.intensity if self.intensity < 1 else outs
 
     def train(self, epochs: int = 100):
