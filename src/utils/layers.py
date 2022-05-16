@@ -1,6 +1,6 @@
 from cleverhans.tf2.attacks.fast_gradient_method import fast_gradient_method
 from cleverhans.tf2.attacks.projected_gradient_descent import projected_gradient_descent
-from cleverhans.tf2.attacks.carlini_wagner_l2 import carlini_wagner_l2
+from cleverhans.tf2.attacks.carlini_wagner_l2 import carlini_wagner_l2, CarliniWagnerL2
 
 import tensorflow as tf
 
@@ -59,28 +59,27 @@ class CwLayer(keras.layers.Layer):
         learning_rate: float,
         **kwargs
     ):
+
         super().__init__(**kwargs)
-        self.victim_model: keras.Model = victim_model
-        self.batch_size: int = batch_size
-        self.clip_min: float = clip_min
-        self.clip_max: float = clip_max
-        self.binary_search_steps: int = binary_search_steps
-        self.max_iterations: int = max_iterations
-        self.initial_const: int = initial_const
-        self.learning_rate: float = learning_rate
+        self.carlini_wagner = CarliniWagnerL2(
+            victim_model,
+            batch_size=batch_size,
+            clip_min=clip_min,
+            clip_max=clip_max,
+            binary_search_steps=binary_search_steps,
+            max_iterations=max_iterations,
+            initial_const=initial_const,
+            learning_rate=learning_rate,
+        )
 
     def call(self, inputs, *args, **kwargs):
-        return carlini_wagner_l2(
-            self.victim_model,
-            tf.cast(inputs, tf.float32),
-            batch_size=self.batch_size,
-            clip_min=self.clip_min,
-            clip_max=self.clip_max,
-            binary_search_steps=self.binary_search_steps,
-            max_iterations=self.max_iterations,
-            initial_const=self.initial_const,
-            learning_rate=self.learning_rate,
-        )
+        @tf.function(input_signature=[tf.TensorSpec(None, tf.float32)])
+        def f(x):
+            return tf.numpy_function(
+                self.carlini_wagner.attack, [tf.cast(x, tf.float32)], tf.float32
+            )
+
+        return f(inputs)
 
 
 class SlqLayer(keras.layers.Layer):
