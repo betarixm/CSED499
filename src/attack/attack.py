@@ -96,6 +96,9 @@ if __name__ == "__main__":
             input_shape=input_shape,
             intensity=args.intensity[0],
         )
+
+        defense_model.compile()
+        defense_model.load()
     elif args.defense == "denoiser":
         defense_model = Denoiser(
             f"defense_denoiser_{args.dataset}",
@@ -114,9 +117,6 @@ if __name__ == "__main__":
 
     classifier.compile()
     classifier.load()
-
-    defense_model.compile()
-    defense_model.load()
 
     attacker = attack_cls(
         f"attack_{args.method}_{args.dataset}",
