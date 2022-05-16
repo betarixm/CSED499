@@ -157,9 +157,8 @@ class Attack(Model, ABC):
         name: str,
         input_shape: tuple,
         victim_model: Model,
-        intensity: float = 1.0,
         *args,
         **kwargs,
     ):
         self.victim_model: Model = victim_model
-        super().__init__(name, input_shape, intensity, *args, **kwargs)
+        super().__init__(name, input_shape, *args, **kwargs)
