@@ -58,6 +58,15 @@ if __name__ == "__main__":
         nargs="+",
     )
 
+    parser.add_argument(
+        "--attack_intensity",
+        "-a",
+        metavar="ATTACK_INTENSITY",
+        type=float,
+        help="Intensity of Attack",
+        required=True,
+    )
+
     args = parser.parse_args()
 
     attacker: Attack
@@ -122,6 +131,7 @@ if __name__ == "__main__":
         f"attack_{args.method}_{args.dataset}",
         victim_model=classifier,
         input_shape=input_shape,
+        intensity=args.attack_intensity,
     )
 
     _, test = dataset.dataset()
@@ -137,11 +147,23 @@ if __name__ == "__main__":
                 defense_model.predict(x_attack) if defense_model is not None else None
             )
 
-            y_attack = classifier.predict(x_attack)
             y_normal = classifier.predict(x)
+            y_attack = classifier.predict(x_attack)
 
-            accuracy_under_attack(y, y_attack)
             accuracy_normal(y, y_normal)
+            accuracy_under_attack(y, y_attack)
+
+            tf.summary.scalar(
+                f"[{args.dataset.upper()}] Normal Accuracy",
+                accuracy_normal.result(),
+                step=idx,
+            )
+
+            tf.summary.scalar(
+                f"[{args.dataset.upper()}] {args.method.upper()} ({args.attack_intensity}) Accuracy under attack",
+                accuracy_under_attack.result(),
+                step=idx,
+            )
 
             tf.summary.image(
                 f"[{args.dataset.upper()}] Original Images",
@@ -150,7 +172,7 @@ if __name__ == "__main__":
             )
 
             tf.summary.image(
-                f"[{args.dataset.upper()}] {args.method.upper()} Attack Images",
+                f"[{args.dataset.upper()}] {args.method.upper()} ({args.attack_intensity}) Attack Images",
                 concat_batch_images(x_attack),
                 step=idx,
             )
@@ -158,8 +180,14 @@ if __name__ == "__main__":
             if defense_model is not None:
                 accuracy_with_defense(y, classifier.predict(x_defense))
 
+                tf.summary.scalar(
+                    f"[{args.dataset.upper()}] {args.method.upper()} ({args.attack_intensity}) Accuracy under defense with {args.defense.upper()} ({', '.join([str(_) for _ in args.intensity])})",
+                    accuracy_under_attack.result(),
+                    step=idx,
+                )
+
                 tf.summary.image(
-                    f"[{args.dataset.upper()}] {args.method.upper()} Defense Images with {args.defense.upper()} ({', '.join([str(_) for _ in args.intensity])})",
+                    f"[{args.dataset.upper()}] {args.method.upper()} ({args.attack_intensity}) Defense Images with {args.defense.upper()} ({', '.join([str(_) for _ in args.intensity])})",
                     concat_batch_images(x_defense),
                     step=idx,
                 )
@@ -177,7 +205,7 @@ if __name__ == "__main__":
             )
 
     print(
-        f"[*] Attack {args.dataset.upper()} by {args.method.upper()} {'with defense' if args.defense else ''}"
+        f"[*] Attack {args.dataset.upper()} by {args.method.upper()} ({args.attack_intensity}) {'with defense' if args.defense else ''}"
     )
     print(f"    - Normal:       {accuracy_normal.result()}")
     print(f"    - Under Attack: {accuracy_under_attack.result()}")
