@@ -182,7 +182,7 @@ if __name__ == "__main__":
 
                 tf.summary.scalar(
                     f"[{args.dataset.upper()}] {args.method.upper()} ({args.attack_intensity}) Accuracy under defense with {args.defense.upper()} ({', '.join([str(_) for _ in args.intensity])})",
-                    accuracy_under_attack.result(),
+                    accuracy_with_defense.result(),
                     step=idx,
                 )
 
