@@ -1,3 +1,4 @@
+import numpy as np
 from cleverhans.tf2.attacks.fast_gradient_method import fast_gradient_method
 from cleverhans.tf2.attacks.projected_gradient_descent import projected_gradient_descent
 from cleverhans.tf2.attacks.carlini_wagner_l2 import carlini_wagner_l2, CarliniWagnerL2
@@ -76,6 +77,18 @@ class CwLayer(keras.layers.Layer):
         return tf.numpy_function(
             self.carlini_wagner.attack, [tf.cast(inputs, tf.float32)], tf.float32
         )
+
+
+class NormalNoiseLayer(keras.layers.Layer):
+    def __init__(self, intensity: float, **kwargs):
+        super().__init__(**kwargs)
+        self.intensity: float = intensity
+
+    def call(self, inputs, *args, **kwargs):
+        def add_noise(x, intensity):
+            return np.clip(x + intensity * np.random.normal(size=np.shape(x)), 0.0, 1.0)
+
+        return tf.numpy_function(add_noise(inputs, self.intensity))
 
 
 class SlqLayer(keras.layers.Layer):

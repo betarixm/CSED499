@@ -1,7 +1,7 @@
 from typing import Tuple, Optional
 from typings.models import Attack, Defense
 from utils.logging import concat_batch_images
-from models import FgsmMnist, FgsmCifar, PgdMnist, PgdCifar, Cw
+from models import FgsmMnist, FgsmCifar, PgdMnist, PgdCifar, Cw, NormalNoise
 from defense.models import Reformer, Denoiser, Motd
 from victim.models import Classifier
 
@@ -35,7 +35,7 @@ if __name__ == "__main__":
         type=str,
         help="Attack method",
         required=True,
-        choices=["fgsm", "pgd", "cw"],
+        choices=["fgsm", "pgd", "cw", "noise"],
     )
 
     parser.add_argument(
@@ -96,8 +96,10 @@ if __name__ == "__main__":
         attack_cls = FgsmMnist if args.dataset == "mnist" else FgsmCifar
     elif args.method == "pgd":
         attack_cls = PgdMnist if args.dataset == "mnist" else PgdCifar
-    else:
+    elif args.method == "cw":
         attack_cls = Cw
+    else:
+        attack_cls = NormalNoise
 
     if args.defense == "reformer":
         defense_model = Reformer(

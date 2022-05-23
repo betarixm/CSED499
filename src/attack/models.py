@@ -1,5 +1,5 @@
 from typings.models import Attack
-from utils.layers import FgsmLayer, PgdLayer, CwLayer
+from utils.layers import FgsmLayer, PgdLayer, CwLayer, NormalNoiseLayer
 
 
 import numpy as np
@@ -48,6 +48,11 @@ class PgdCifar(Attack):
                 )
             ]
         )
+
+
+class NormalNoise(Attack):
+    def _model(self) -> keras.Model:
+        return keras.Sequential([NormalNoiseLayer(0.1)])
 
 
 class Cw(Attack):
