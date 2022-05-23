@@ -89,7 +89,11 @@ class NormalNoiseLayer(keras.layers.Layer):
             return x + intensity * np.random.normal(size=np.shape(x))
 
         return tf.clip_by_value(
-            tf.numpy_function(add_noise, [inputs, self.intensity], tf.float32), 0.0, 1.0
+            tf.numpy_function(
+                add_noise, [tf.cast(inputs, tf.float32), self.intensity], tf.float32
+            ),
+            0.0,
+            1.0,
         )
 
 
