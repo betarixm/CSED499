@@ -116,7 +116,9 @@ class SlqLayer(keras.layers.Layer):
             zero = tf.constant(0, name="zero")
 
             image = tf.cast(
-                keras.layers.experimental.preprocessing.Rescaling(255)(image),
+                keras.layers.experimental.preprocessing.Rescaling(255)(
+                    tf.clip_by_value(image, 0.0, 1.0)
+                ),
                 tf.uint8,
             )
 
