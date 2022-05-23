@@ -52,7 +52,7 @@ class PgdCifar(Attack):
 
 class NormalNoise(Attack):
     def _model(self) -> keras.Model:
-        return keras.Sequential([NormalNoiseLayer(0.1)])
+        return keras.Sequential([NormalNoiseLayer(1.0)])
 
 
 class Cw(Attack):
