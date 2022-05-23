@@ -86,9 +86,11 @@ class NormalNoiseLayer(keras.layers.Layer):
 
     def call(self, inputs, *args, **kwargs):
         def add_noise(x, intensity):
-            return np.clip(x + intensity * np.random.normal(size=np.shape(x)), 0.0, 1.0)
+            return x + intensity * np.random.normal(size=np.shape(x))
 
-        return tf.numpy_function(add_noise(inputs, self.intensity))
+        return tf.clip_by_value(
+            tf.numpy_function(add_noise(inputs, self.intensity)), 0.0, 1.0
+        )
 
 
 class SlqLayer(keras.layers.Layer):
@@ -172,4 +174,4 @@ class SlqLayer(keras.layers.Layer):
 
             return result
 
-        return tf.map_fn(fn=compress, elems=inputs)
+        return tf.clip_by_value(tf.map_fn(fn=compress, elems=inputs), 0.0, 1.0)
