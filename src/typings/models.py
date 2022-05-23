@@ -121,7 +121,7 @@ class Model(ABC):
 
     def predict(self, inputs):
         inputs = tf.cast(inputs, tf.float32)
-        outs = self.__model(inputs)
+        outs = tf.cast(self.__model(inputs), tf.float32)
         return inputs + (outs - inputs) * self.intensity if self.intensity < 1 else outs
 
     def train(self, epochs: int = 100):
