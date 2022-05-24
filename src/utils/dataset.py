@@ -75,10 +75,6 @@ class IdemCifar10(ImageDataset, IdemMixin):
         return (x_train, y_train), (x_test, y_test)
 
 
-class EnCifar10(Datasets):
+class ExCifar10(Datasets):
     def __init__(self):
         super().__init__([IdemCifar10(), NoisyCifar10(), SlqCifar10()])
-
-
-if __name__ == "__main__":
-    (x_train, y_train), (x_test, y_test) = EnCifar10().load_data()

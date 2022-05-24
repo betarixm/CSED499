@@ -1,4 +1,4 @@
-from utils.dataset import NoisyMnist, NoisyCifar10, EnCifar10
+from utils.dataset import NoisyMnist, NoisyCifar10, ExCifar10
 from models import Reformer
 
 import argparse
@@ -31,10 +31,10 @@ def train_cifar10_reformer(epochs: int = 100):
     reformer.train(epochs)
 
 
-def train_encifar10_exformer(epochs: int = 100):
-    train_set, test_set = EnCifar10().dataset()
+def train_excifar10_exformer(epochs: int = 100):
+    train_set, test_set = ExCifar10().dataset()
     reformer = Reformer(
-        "defense_exformer_cifar10",
+        "defense_exformer_excifar10",
         (32, 32, 3),
         1.0,
         train_set,
@@ -52,7 +52,7 @@ if __name__ == "__main__":
         type=str,
         help="Dataset for training",
         required=True,
-        choices=["mnist", "cifar10", "encifar10"],
+        choices=["mnist", "cifar10", "excifar10"],
     )
 
     parser.add_argument(
@@ -72,5 +72,5 @@ if __name__ == "__main__":
         train_mnist_reformer(e)
     elif args.dataset == "cifar10":
         train_cifar10_reformer(e)
-    elif args.dataset == "encifar10":
-        train_encifar10_exformer(e)
+    elif args.dataset == "excifar10":
+        train_excifar10_exformer(e)
