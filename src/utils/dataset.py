@@ -1,5 +1,12 @@
 from typing import Tuple
-from typings.dataset import ImageDataset, GrayscaleMixin, NoisyMixin
+from typings.dataset import (
+    Datasets,
+    ImageDataset,
+    GrayscaleMixin,
+    NoisyMixin,
+    SlqMixin,
+    IdemMixin,
+)
 from typings.dataset import NumpyDataset
 
 import tensorflow as tf
@@ -44,3 +51,34 @@ class NoisyCifar10(ImageDataset, NoisyMixin):
     ) -> Tuple[NumpyDataset, NumpyDataset]:
         (x_train, y_train), (x_test, y_test) = NoisyMixin.process(train, test)
         return (x_train, y_train), (x_test, y_test)
+
+
+class SlqCifar10(ImageDataset, SlqMixin):
+    def __init__(self):
+        super().__init__(keras.datasets.cifar10)
+
+    def postprocess(
+        self, train: NumpyDataset, test: NumpyDataset
+    ) -> Tuple[NumpyDataset, NumpyDataset]:
+        (x_train, y_train), (x_test, y_test) = SlqMixin.process(train, test)
+        return (x_train, y_train), (x_test, y_test)
+
+
+class IdemCifar10(ImageDataset, IdemMixin):
+    def __init__(self):
+        super().__init__(keras.datasets.cifar10)
+
+    def postprocess(
+        self, train: NumpyDataset, test: NumpyDataset
+    ) -> Tuple[NumpyDataset, NumpyDataset]:
+        (x_train, y_train), (x_test, y_test) = IdemMixin.process(train, test)
+        return (x_train, y_train), (x_test, y_test)
+
+
+class EnCifar10(Datasets):
+    def __init__(self):
+        super().__init__([IdemCifar10(), NoisyCifar10(), SlqCifar10()])
+
+
+if __name__ == "__main__":
+    (x_train, y_train), (x_test, y_test) = EnCifar10().load_data()
