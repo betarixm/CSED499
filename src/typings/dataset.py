@@ -1,8 +1,10 @@
-from abc import ABC, abstractmethod
-from typing import NewType, Tuple, Protocol
+from abc import ABC
+from typing import NewType, Tuple, Protocol, List
 
 import numpy as np
 import tensorflow as tf
+
+from defense.models import Denoiser
 
 keras = tf.keras
 
@@ -22,7 +24,7 @@ class DatasetPostprocessMixin(Protocol):
 
 class Dataset(ABC):
     def __init__(self, dataset):
-        if not hasattr(dataset, "load_data"):
+        if dataset is not None and not hasattr(dataset, "load_data"):
             raise TypeError
 
         self.ds = dataset
@@ -116,3 +118,30 @@ class NoisyMixin(DatasetPostprocessMixin):
         (x_train, y_train), (x_test, y_test) = train, test
 
         return (noisy(x_train), x_train), (noisy(x_test), x_test)
+
+
+class SlqMixin(DatasetPostprocessMixin):
+    @staticmethod
+    def process(
+        train: NumpyDataset, test: NumpyDataset
+    ) -> Tuple[NumpyDataset, NumpyDataset]:
+        (x_train, y_train), (x_test, y_test) = train, test
+
+        defense_model = Denoiser(
+            f"denoiser_dataset_generator", input_shape=x_train.shape[-3:]
+        )
+
+        def noisy(ds: np.array):
+            return defense_model.predict(ds)
+
+        return (noisy(x_train), x_train), (noisy(x_test), x_test)
+
+
+class IdemMixin(DatasetPostprocessMixin):
+    @staticmethod
+    def process(
+        train: NumpyDataset, test: NumpyDataset
+    ) -> Tuple[NumpyDataset, NumpyDataset]:
+        (x_train, _), (x_test, _) = train, test
+
+        return (x_train, x_train), (x_test, x_test)
