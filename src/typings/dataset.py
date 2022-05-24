@@ -64,10 +64,31 @@ class Dataset(ABC):
 
 
 class ImageDataset(Dataset):
-    def postprocess(
-        self, train: NumpyDataset, test: NumpyDataset
-    ) -> Tuple[NumpyDataset, NumpyDataset]:
-        return train, test
+    pass
+
+
+class Datasets(Dataset, ABC):
+    def __init__(self, datasets: List[Dataset]):
+        super().__init__(None)
+        self.datasets: List[Dataset] = datasets
+
+    def load_data(self) -> Tuple[NumpyDataset, NumpyDataset]:
+        datasets_stack = [
+            (_x_train, _y_train, _x_test, _y_test)
+            for (_x_train, _y_train), (_x_test, _y_test) in [
+                ds.load_data() for ds in self.datasets
+            ]
+        ]
+
+        categorical_stack = map(list, zip(*datasets_stack))
+
+        x_train, y_train, x_test, y_test = map(np.concatenate, categorical_stack)
+
+        (x_train, y_train), (x_test, y_test) = self.postprocess(
+            (x_train, y_train), (x_test, y_test)
+        )
+
+        return (x_train, y_train), (x_test, y_test)
 
 
 class GrayscaleMixin(DatasetPostprocessMixin):
