@@ -10,6 +10,34 @@ keras = tf.keras
 
 
 class Reformer(Defense):
+    def __init__(
+        self,
+        name: str,
+        input_shape: tuple,
+        intensity: float = 1.0,
+        data_train: tf.data.Dataset = None,
+        data_test: tf.data.Dataset = None,
+        optimizer: keras.optimizers.Optimizer = keras.optimizers.Adam(),
+        loss: keras.losses.Loss = keras.losses.MeanSquaredError(),
+        accuracy: keras.metrics.Accuracy = keras.metrics.CategoricalAccuracy(
+            name="accuracy"
+        ),
+        checkpoint_filepath: str = None,
+        tensorboard_log_path: str = None,
+    ):
+        super().__init__(
+            name,
+            input_shape,
+            intensity,
+            data_train,
+            data_test,
+            optimizer,
+            loss,
+            accuracy,
+            checkpoint_filepath,
+            tensorboard_log_path,
+        )
+
     def _model(self) -> keras.Model:
         def layer_conv2d():
             return keras.layers.Conv2D(

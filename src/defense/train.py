@@ -1,4 +1,4 @@
-from utils.dataset import NoisyMnist, NoisyCifar10
+from utils.dataset import NoisyMnist, NoisyCifar10, EnCifar10
 from models import Reformer
 
 import argparse
@@ -12,6 +12,7 @@ def train_mnist_reformer(epochs: int = 100):
     reformer = Reformer(
         "defense_reformer_mnist",
         (28, 28, 1),
+        1.0,
         train_set,
         test_set,
     )
@@ -23,9 +24,21 @@ def train_cifar10_reformer(epochs: int = 100):
     reformer = Reformer(
         "defense_reformer_cifar10",
         (32, 32, 3),
+        1.0,
         train_set,
         test_set,
-        accuracy=keras.metrics.CategoricalAccuracy(name="accuracy"),
+    )
+    reformer.train(epochs)
+
+
+def train_encifar10_exformer(epochs: int = 100):
+    train_set, test_set = EnCifar10().dataset()
+    reformer = Reformer(
+        "defense_exformer_cifar10",
+        (32, 32, 3),
+        1.0,
+        train_set,
+        test_set,
     )
     reformer.train(epochs)
 
@@ -39,7 +52,7 @@ if __name__ == "__main__":
         type=str,
         help="Dataset for training",
         required=True,
-        choices=["mnist", "cifar10"],
+        choices=["mnist", "cifar10", "encifar10"],
     )
 
     parser.add_argument(
@@ -59,3 +72,5 @@ if __name__ == "__main__":
         train_mnist_reformer(e)
     elif args.dataset == "cifar10":
         train_cifar10_reformer(e)
+    elif args.dataset == "encifar10":
+        train_encifar10_exformer(e)
