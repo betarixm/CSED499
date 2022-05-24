@@ -27,11 +27,10 @@ class Dataset(ABC):
 
         self.ds = dataset
 
-    @abstractmethod
     def postprocess(
         self, train: NumpyDataset, test: NumpyDataset
     ) -> Tuple[NumpyDataset, NumpyDataset]:
-        pass
+        return train, test
 
     def load_data(self) -> Tuple[NumpyDataset, NumpyDataset]:
         ds = self.ds
