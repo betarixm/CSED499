@@ -83,7 +83,11 @@ class Reformer(Defense):
                     step=epoch,
                 )
 
-        return [keras.callbacks.LambdaCallback(on_epoch_end=predict)]
+        reduce_lr = keras.callbacks.ReduceLROnPlateau(
+            monitor="val_loss", factor=0.2, patience=5, min_lr=0.001
+        )
+
+        return [reduce_lr, keras.callbacks.LambdaCallback(on_epoch_end=predict)]
 
 
 class Denoiser(Defense):
