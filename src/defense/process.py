@@ -61,7 +61,7 @@ if __name__ == "__main__":
         )
     elif args.defense == "exformer":
         defense_model = Reformer(
-            "defense_exformer_cifar10",
+            f"defense_exformer_{args.dataset}",
             input_shape=input_shape,
             intensity=args.intensity[0],
         )
