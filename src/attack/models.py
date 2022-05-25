@@ -15,9 +15,7 @@ class FgsmMnist(Attack):
 
 class FgsmCifar(Attack):
     def _model(self) -> keras.Model:
-        return keras.Sequential(
-            [FgsmLayer(self.victim_model.model(), 16 / 255, np.inf)]
-        )
+        return keras.Sequential([FgsmLayer(self.victim_model.model(), 7 / 255, np.inf)])
 
 
 class PgdMnist(Attack):
@@ -41,9 +39,9 @@ class PgdCifar(Attack):
             [
                 PgdLayer(
                     self.victim_model.model(),
-                    16 / 255,
+                    4 / 255,
                     1 / 255,
-                    40,
+                    64,
                     np.inf,
                 )
             ]
