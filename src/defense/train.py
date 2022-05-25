@@ -1,5 +1,5 @@
 from utils.dataset import NoisyMnist, NoisyCifar10, ExCifar10
-from models import Reformer
+from models import Reformer, Exformer
 
 import argparse
 import tensorflow as tf
@@ -33,14 +33,14 @@ def train_cifar10_reformer(epochs: int = 100):
 
 def train_excifar10_exformer(epochs: int = 100):
     train_set, test_set = ExCifar10().dataset()
-    reformer = Reformer(
+    exformer = Exformer(
         "defense_exformer_cifar10",
         (32, 32, 3),
         1.0,
         train_set,
         test_set,
     )
-    reformer.train(epochs)
+    exformer.train(epochs)
 
 
 if __name__ == "__main__":

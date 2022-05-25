@@ -1,5 +1,5 @@
 from utils.logging import concat_batch_images
-from defense.models import Reformer, Denoiser, Motd, ExMotd
+from defense.models import Reformer, Exformer, Denoiser, Motd, ExMotd
 
 import tensorflow as tf
 
@@ -60,7 +60,7 @@ if __name__ == "__main__":
             intensity=args.intensity[0],
         )
     elif args.defense == "exformer":
-        defense_model = Reformer(
+        defense_model = Exformer(
             f"defense_exformer_{args.dataset}",
             input_shape=input_shape,
             intensity=args.intensity[0],

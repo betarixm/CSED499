@@ -18,7 +18,7 @@ class Reformer(Defense):
         data_train: tf.data.Dataset = None,
         data_test: tf.data.Dataset = None,
         optimizer: keras.optimizers.Optimizer = keras.optimizers.Adam(),
-        loss: keras.losses.Loss = keras.losses.MeanSquaredError(),
+        loss: keras.losses.Loss = keras.losses.BinaryCrossentropy(),
         accuracy: keras.metrics.Accuracy = keras.metrics.CategoricalAccuracy(
             name="accuracy"
         ),
@@ -36,6 +36,7 @@ class Reformer(Defense):
             accuracy,
             checkpoint_filepath,
             tensorboard_log_path,
+            is_functional=True,
         )
 
     def _model(self) -> keras.Model:
@@ -88,6 +89,55 @@ class Reformer(Defense):
         )
 
         return [reduce_lr, keras.callbacks.LambdaCallback(on_epoch_end=predict)]
+
+
+class Exformer(Reformer):
+    def _model(self) -> keras.Model:
+        """
+        Reference: https://www.kaggle.com/code/tarunk04/autoencoder-denoising-image-mnist-cifar10/notebook#Denoising-Cifar10-Data
+        Denoising Autoencoder with Skip Connection
+        """
+
+        inputs = keras.layers.Input(shape=self.input_shape())
+        # Encoder - 1
+        x = keras.layers.Conv2D(32, 3, activation="relu", padding="same")(inputs)
+        x = keras.layers.BatchNormalization()(x)
+        x = keras.layers.MaxPool2D()(x)
+        x = keras.layers.Dropout(0.5)(x)
+        # Encoder - 2
+        skip = keras.layers.Conv2D(32, 3, padding="same")(x)
+        x = keras.layers.LeakyReLU()(skip)
+        x = keras.layers.BatchNormalization()(x)
+        x = keras.layers.MaxPool2D()(x)
+        x = keras.layers.Dropout(0.5)(x)
+        # Encoder - Finalize
+        x = keras.layers.Conv2D(64, 3, activation="relu", padding="same")(x)
+        x = keras.layers.BatchNormalization()(x)
+        encoded = keras.layers.MaxPool2D()(x)
+
+        # Decoder - 1
+        x = keras.layers.Conv2DTranspose(
+            64, 3, activation="relu", strides=(2, 2), padding="same"
+        )(encoded)
+        x = keras.layers.BatchNormalization()(x)
+        x = keras.layers.Dropout(0.5)(x)
+        # Decoder - 2
+        x = keras.layers.Conv2DTranspose(
+            32, 3, activation="relu", strides=(2, 2), padding="same"
+        )(x)
+        x = keras.layers.BatchNormalization()(x)
+        x = keras.layers.Dropout(0.5)(x)
+        # Decoder - 3
+        x = keras.layers.Conv2DTranspose(32, 3, padding="same")(x)
+        x = keras.layers.Add()([skip, x])
+        x = keras.layers.LeakyReLU()(x)
+        x = keras.layers.BatchNormalization()(x)
+        # Decoder - Finalize
+        decoded = keras.layers.Conv2DTranspose(
+            3, 3, activation="sigmoid", strides=(2, 2), padding="same"
+        )(x)
+
+        return keras.Model(inputs, decoded)
 
 
 class Denoiser(Defense):
@@ -158,7 +208,7 @@ class ExMotd(Defense):
             input_shape=input_shape,
             intensity=intensities[0],
         )
-        self.exformer = Reformer(
+        self.exformer = Exformer(
             f"defense_exformer_{dataset}",
             input_shape=input_shape,
             intensity=intensities[1],

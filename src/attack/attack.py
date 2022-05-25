@@ -2,7 +2,7 @@ from typing import Tuple, Optional
 from typings.models import Attack, Defense
 from utils.logging import concat_batch_images
 from models import FgsmMnist, FgsmCifar, PgdMnist, PgdCifar, Cw, NormalNoise
-from defense.models import Reformer, Denoiser, Motd, ExMotd
+from defense.models import Reformer, Exformer, Denoiser, Motd, ExMotd
 from victim.models import Classifier
 
 from utils.dataset import Mnist, Cifar10
@@ -111,7 +111,7 @@ if __name__ == "__main__":
         defense_model.compile()
         defense_model.load()
     elif args.defense == "exformer":
-        defense_model = Reformer(
+        defense_model = Exformer(
             f"defense_exformer_{args.dataset}",
             input_shape=input_shape,
             intensity=args.intensity[0],
