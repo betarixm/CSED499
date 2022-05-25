@@ -24,6 +24,7 @@ class Reformer(Defense):
         ),
         checkpoint_filepath: str = None,
         tensorboard_log_path: str = None,
+        is_functional: bool = False,
     ):
         super().__init__(
             name,
@@ -36,7 +37,7 @@ class Reformer(Defense):
             accuracy,
             checkpoint_filepath,
             tensorboard_log_path,
-            is_functional=True,
+            is_functional=is_functional,
         )
 
     def _model(self) -> keras.Model:
@@ -92,6 +93,35 @@ class Reformer(Defense):
 
 
 class Exformer(Reformer):
+    def __init__(
+        self,
+        name: str,
+        input_shape: tuple,
+        intensity: float = 1.0,
+        data_train: tf.data.Dataset = None,
+        data_test: tf.data.Dataset = None,
+        optimizer: keras.optimizers.Optimizer = keras.optimizers.Adam(),
+        loss: keras.losses.Loss = keras.losses.BinaryCrossentropy(),
+        accuracy: keras.metrics.Accuracy = keras.metrics.CategoricalAccuracy(
+            name="accuracy"
+        ),
+        checkpoint_filepath: str = None,
+        tensorboard_log_path: str = None,
+    ):
+        super().__init__(
+            name,
+            input_shape,
+            intensity,
+            data_train,
+            data_test,
+            optimizer,
+            loss,
+            accuracy,
+            checkpoint_filepath,
+            tensorboard_log_path,
+            is_functional=True,
+        )
+
     def _model(self) -> keras.Model:
         """
         Reference: https://www.kaggle.com/code/tarunk04/autoencoder-denoising-image-mnist-cifar10/notebook#Denoising-Cifar10-Data
