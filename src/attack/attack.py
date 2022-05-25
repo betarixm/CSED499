@@ -2,7 +2,7 @@ from typing import Tuple, Optional
 from typings.models import Attack, Defense
 from utils.logging import concat_batch_images
 from models import FgsmMnist, FgsmCifar, PgdMnist, PgdCifar, Cw, NormalNoise
-from defense.models import Reformer, Denoiser, Motd
+from defense.models import Reformer, Denoiser, Motd, ExMotd
 from victim.models import Classifier
 
 from utils.dataset import Mnist, Cifar10
@@ -45,7 +45,7 @@ if __name__ == "__main__":
         type=str,
         help="Defense method",
         required=True,
-        choices=["reformer", "denoiser", "motd", "none"],
+        choices=["reformer", "exformer", "denoiser", "motd", "exmotd", "none"],
     )
 
     parser.add_argument(
@@ -110,6 +110,15 @@ if __name__ == "__main__":
 
         defense_model.compile()
         defense_model.load()
+    elif args.defense == "exformer":
+        defense_model = Reformer(
+            f"defense_exformer_{args.dataset}",
+            input_shape=input_shape,
+            intensity=args.intensity[0],
+        )
+
+        defense_model.compile()
+        defense_model.load()
     elif args.defense == "denoiser":
         defense_model = Denoiser(
             f"defense_denoiser_{args.dataset}",
@@ -119,6 +128,13 @@ if __name__ == "__main__":
     elif args.defense == "motd":
         defense_model = Motd(
             f"defense_motd_{args.dataset}",
+            input_shape=input_shape,
+            dataset=args.dataset,
+            intensities=args.intensity,
+        )
+    elif args.defense == "exmotd":
+        defense_model = ExMotd(
+            f"defense_exmotd_{args.dataset}",
             input_shape=input_shape,
             dataset=args.dataset,
             intensities=args.intensity,
