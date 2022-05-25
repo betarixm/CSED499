@@ -34,7 +34,7 @@ def train_cifar10_reformer(epochs: int = 100):
 def train_excifar10_exformer(epochs: int = 100):
     train_set, test_set = ExCifar10().dataset()
     reformer = Reformer(
-        "defense_exformer_excifar10",
+        "defense_exformer_cifar10",
         (32, 32, 3),
         1.0,
         train_set,
