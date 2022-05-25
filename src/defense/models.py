@@ -141,3 +141,42 @@ class Motd(Defense):
 
     def custom_callbacks(self) -> List[keras.callbacks.Callback]:
         pass
+
+
+class ExMotd(Defense):
+    def __init__(
+        self,
+        name: str,
+        input_shape: tuple,
+        dataset: Literal["mnist", "cifar10"],
+        intensities: Tuple[float, float] = (1.0, 1.0),
+        *args,
+        **kwargs,
+    ):
+        self.denoiser = Denoiser(
+            f"defense_denoiser_{dataset}",
+            input_shape=input_shape,
+            intensity=intensities[0],
+        )
+        self.exformer = Reformer(
+            f"defense_exformer_{dataset}",
+            input_shape=input_shape,
+            intensity=intensities[1],
+        )
+
+        super().__init__(name, input_shape, *args, **kwargs)
+
+    def _model(self) -> keras.Model:
+        self.exformer.compile()
+        self.exformer.load()
+
+        return SequentialInternalModel(models=[self.denoiser, self.exformer])
+
+    def pre_train(self):
+        pass
+
+    def post_train(self):
+        pass
+
+    def custom_callbacks(self) -> List[keras.callbacks.Callback]:
+        pass
