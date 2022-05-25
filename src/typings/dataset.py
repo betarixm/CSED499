@@ -59,8 +59,8 @@ class Dataset(ABC):
             .batch(batch)
         )
 
-        train_ds = train_ds.map(lambda x, y: (preprocessing_layer(x), y))
-        train_ds = train_ds.prefetch(tf.data.AUTOTUNE)
+        # train_ds = train_ds.map(lambda x, y: (preprocessing_layer(x), y))
+        # train_ds = train_ds.prefetch(tf.data.AUTOTUNE)
 
         test_ds = tf.data.Dataset.from_tensor_slices((x_test, y_test)).batch(batch)
 
