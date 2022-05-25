@@ -23,6 +23,7 @@ class Model(ABC):
         ),
         checkpoint_filepath: str = None,
         tensorboard_log_path: str = None,
+        is_functional: bool = False,
     ):
         self._name: str = name
 
@@ -31,14 +32,17 @@ class Model(ABC):
 
         self.__input_shape = input_shape
 
-        self.__model: keras.Model = (
-            keras.Sequential(
+        if is_functional:
+            inputs = keras.Input(self.__input_shape)
+            outputs = self._model()(inputs)
+            self.__model: keras.Model = keras.Model(inputs, outputs, name=self._name)
+        elif len(self._model().layers) != 0:
+            self.__model: keras.Model = keras.Sequential(
                 [keras.Input(self.__input_shape), *self._model().layers],
                 name=self._name,
             )
-            if len(self._model().layers) != 0
-            else self._model()
-        )
+        else:
+            self.__model: keras.Model = self._model()
 
         self.intensity: float = intensity
 
