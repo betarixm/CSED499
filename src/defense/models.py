@@ -172,7 +172,7 @@ class Exformer(Reformer):
 
 class Denoiser(Defense):
     def _model(self) -> keras.Model:
-        return keras.Sequential([SlqLayer()])
+        return keras.Sequential([SlqLayer(patch_size=2)])
 
     def pre_train(self):
         pass
