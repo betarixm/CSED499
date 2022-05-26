@@ -99,3 +99,8 @@ class IdemCifar10(ImageDataset, IdemMixin):
 class ExCifar10(Datasets):
     def __init__(self):
         super().__init__([IdemCifar10(), NoisyCifar10(), SlqCifar10()])
+
+
+class TgCifar10(Datasets):
+    def __init__(self):
+        super().__init__([SlqCifar10(), NoisySlqCifar10()])
