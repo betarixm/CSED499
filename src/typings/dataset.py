@@ -47,11 +47,9 @@ class Dataset(ABC):
         return (x_train, y_train), (x_test, y_test)
 
     def dataset(
-        self, shuffle: int = 10000, batch: int = 32
+        self, shuffle: int = 262144, batch: int = 32
     ) -> Tuple[TestSet, TrainSet]:
         (x_train, y_train), (x_test, y_test) = self.load_data()
-
-        preprocessing_layer = keras.layers.experimental.preprocessing.Normalization()
 
         train_ds = (
             tf.data.Dataset.from_tensor_slices((x_train, y_train))
@@ -59,8 +57,7 @@ class Dataset(ABC):
             .batch(batch)
         )
 
-        # train_ds = train_ds.map(lambda x, y: (preprocessing_layer(x), y))
-        # train_ds = train_ds.prefetch(tf.data.AUTOTUNE)
+        train_ds = train_ds.prefetch(tf.data.AUTOTUNE)
 
         test_ds = tf.data.Dataset.from_tensor_slices((x_test, y_test)).batch(batch)
 
