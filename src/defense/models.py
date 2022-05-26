@@ -101,7 +101,7 @@ class Exformer(Reformer):
         data_train: tf.data.Dataset = None,
         data_test: tf.data.Dataset = None,
         optimizer: keras.optimizers.Optimizer = keras.optimizers.Adam(),
-        loss: keras.losses.Loss = keras.losses.BinaryCrossentropy(),
+        loss: keras.losses.Loss = keras.losses.MeanSquaredError(),
         accuracy: keras.metrics.Accuracy = keras.metrics.CategoricalAccuracy(
             name="accuracy"
         ),
