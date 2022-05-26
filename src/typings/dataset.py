@@ -47,7 +47,7 @@ class Dataset(ABC):
         return (x_train, y_train), (x_test, y_test)
 
     def dataset(
-        self, shuffle: int = 262144, batch: int = 32
+        self, shuffle: int = 1048576, batch: int = 32
     ) -> Tuple[TestSet, TrainSet]:
         (x_train, y_train), (x_test, y_test) = self.load_data()
 
@@ -147,3 +147,57 @@ class IdemMixin(DatasetPostprocessMixin):
         (x_train, _), (x_test, _) = train, test
 
         return (x_train, x_train), (x_test, x_test)
+
+
+class AugmentationMixin(DatasetPostprocessMixin):
+    @staticmethod
+    def process(
+        train: NumpyDataset, test: NumpyDataset
+    ) -> Tuple[NumpyDataset, NumpyDataset]:
+        (x_train_original, y_train_original), (x_test_original, y_test_original) = (
+            train,
+            test,
+        )
+
+        data_augmentation_1 = tf.keras.Sequential(
+            [
+                keras.layers.experimental.preprocessing.RandomFlip(
+                    "horizontal_and_vertical"
+                ),
+                keras.layers.experimental.preprocessing.RandomRotation(0.2),
+            ]
+        )
+
+        # data_augmentation_2 = tf.keras.Sequential([keras.layers.RandomContrast(0.2)])
+
+        x_train = np.concatenate(
+            (
+                x_train_original,
+                data_augmentation_1(x_train_original),
+                # data_augmentation_2(x_train_original),
+            )
+        )
+
+        y_train = np.concatenate(
+            (
+                y_train_original,
+                y_train_original,
+                # y_train_original
+            )
+        )
+
+        x_test = np.concatenate(
+            (
+                x_test_original,
+                data_augmentation_1(x_test_original),
+                # data_augmentation_2(x_test_original),
+            )
+        )
+        y_test = np.concatenate(
+            (
+                y_test_original,
+                y_test_original,  # y_test_original
+            )
+        )
+
+        return (x_train, y_train), (x_test, y_test)

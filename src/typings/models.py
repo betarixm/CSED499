@@ -59,7 +59,7 @@ class Model(ABC):
             keras.callbacks.ModelCheckpoint(
                 filepath=self.checkpoint_filepath,
                 save_weights_only=True,
-                monitor="val_loss",
+                monitor="val_accuracy",
                 mode="max",
                 save_best_only=True,
             )

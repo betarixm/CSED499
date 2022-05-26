@@ -100,7 +100,9 @@ class Exformer(Reformer):
         intensity: float = 1.0,
         data_train: tf.data.Dataset = None,
         data_test: tf.data.Dataset = None,
-        optimizer: keras.optimizers.Optimizer = keras.optimizers.Adam(),
+        optimizer: keras.optimizers.Optimizer = keras.optimizers.Adam(
+            learning_rate=0.001
+        ),
         loss: keras.losses.Loss = keras.losses.MeanSquaredError(),
         accuracy: keras.metrics.Accuracy = keras.metrics.CategoricalAccuracy(
             name="accuracy"
@@ -135,7 +137,6 @@ class Exformer(Reformer):
             3,
             activation="relu",
             padding="same",
-            activity_regularizer=keras.regularizers.l2(1e-9),
         )(inputs)
         x = keras.layers.BatchNormalization()(x)
         x = keras.layers.MaxPool2D()(x)
@@ -145,7 +146,6 @@ class Exformer(Reformer):
             32,
             3,
             padding="same",
-            activity_regularizer=keras.regularizers.l2(1e-9),
         )(x)
         x = keras.layers.LeakyReLU()(skip)
         x = keras.layers.BatchNormalization()(x)
@@ -169,7 +169,6 @@ class Exformer(Reformer):
             activation="relu",
             strides=(2, 2),
             padding="same",
-            activity_regularizer=keras.regularizers.l2(1e-9),
         )(encoded)
         x = keras.layers.BatchNormalization()(x)
         x = keras.layers.Dropout(0.5)(x)
@@ -180,7 +179,6 @@ class Exformer(Reformer):
             activation="relu",
             strides=(2, 2),
             padding="same",
-            activity_regularizer=keras.regularizers.l2(1e-9),
         )(x)
         x = keras.layers.BatchNormalization()(x)
         x = keras.layers.Dropout(0.5)(x)
@@ -201,7 +199,87 @@ class Exformer(Reformer):
             activation="sigmoid",
             strides=(2, 2),
             padding="same",
+        )(x)
+
+        return keras.Model(inputs, decoded)
+
+
+class Tgformer(Exformer):
+    def _model(self) -> keras.Model:
+        """
+        Reference: https://www.kaggle.com/code/tarunk04/autoencoder-denoising-image-mnist-cifar10/notebook#Denoising-Cifar10-Data
+        Denoising Autoencoder with Skip Connection
+        """
+
+        inputs = keras.layers.Input(shape=self.input_shape())
+        # Encoder - 1
+        x = keras.layers.Conv2D(
+            32,
+            3,
+            activation="relu",
+            padding="same",
+        )(inputs)
+        x = keras.layers.BatchNormalization()(x)
+        x = keras.layers.MaxPool2D()(x)
+        # x = keras.layers.Dropout(0.5)(x)
+        # Encoder - 2
+        skip = keras.layers.Conv2D(
+            32,
+            3,
+            padding="same",
+        )(x)
+        x = keras.layers.LeakyReLU()(skip)
+        x = keras.layers.BatchNormalization()(x)
+        x = keras.layers.MaxPool2D()(x)
+        # x = keras.layers.Dropout(0.5)(x)
+        # Encoder - Finalize
+        x = keras.layers.Conv2D(
+            64,
+            3,
+            activation="relu",
+            padding="same",
             activity_regularizer=keras.regularizers.l2(1e-9),
+        )(x)
+        x = keras.layers.BatchNormalization()(x)
+        encoded = keras.layers.MaxPool2D()(x)
+
+        # Decoder - 1
+        x = keras.layers.Conv2DTranspose(
+            64,
+            3,
+            activation="relu",
+            strides=(2, 2),
+            padding="same",
+        )(encoded)
+        x = keras.layers.BatchNormalization()(x)
+        # x = keras.layers.Dropout(0.5)(x)
+        # Decoder - 2
+        x = keras.layers.Conv2DTranspose(
+            32,
+            3,
+            activation="relu",
+            strides=(2, 2),
+            padding="same",
+        )(x)
+        x = keras.layers.BatchNormalization()(x)
+        # x = keras.layers.Dropout(0.5)(x)
+        # Decoder - 3
+        x = keras.layers.Conv2DTranspose(
+            32,
+            3,
+            padding="same",
+            activity_regularizer=keras.regularizers.l2(1e-9),
+        )(x)
+        x = keras.layers.Add()([skip, x])
+        x = keras.layers.LeakyReLU()(x)
+        x = keras.layers.BatchNormalization()(x)
+        # Decoder - Finalize
+        decoded = keras.layers.Conv2DTranspose(
+            3,
+            3,
+            activation="sigmoid",
+            strides=(2, 2),
+            padding="same",
         )(x)
 
         return keras.Model(inputs, decoded)
@@ -289,11 +367,32 @@ class ExMotd(Defense):
 
         return SequentialInternalModel(models=[self.denoiser, self.exformer])
 
-    def pre_train(self):
-        pass
 
-    def post_train(self):
-        pass
+class TgMotd(Defense):
+    def __init__(
+        self,
+        name: str,
+        input_shape: tuple,
+        dataset: Literal["mnist", "cifar10"],
+        intensities: Tuple[float, float] = (1.0, 1.0),
+        *args,
+        **kwargs,
+    ):
+        self.denoiser = Denoiser(
+            f"defense_denoiser_{dataset}",
+            input_shape=input_shape,
+            intensity=intensities[0],
+        )
+        self.tgformer = Tgformer(
+            f"defense_tgformer_{dataset}",
+            input_shape=input_shape,
+            intensity=intensities[1],
+        )
 
-    def custom_callbacks(self) -> List[keras.callbacks.Callback]:
-        pass
+        super().__init__(name, input_shape, *args, **kwargs)
+
+    def _model(self) -> keras.Model:
+        self.tgformer.compile()
+        self.tgformer.load()
+
+        return SequentialInternalModel(models=[self.denoiser, self.tgformer])

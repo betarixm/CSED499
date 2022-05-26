@@ -6,6 +6,7 @@ from typings.dataset import (
     NoisyMixin,
     SlqMixin,
     IdemMixin,
+    AugmentationMixin,
 )
 from typings.dataset import NumpyDataset
 
@@ -54,18 +55,19 @@ class NoisyCifar10(ImageDataset, NoisyMixin):
         return (x_train, y_train), (x_test, y_test)
 
 
-class SlqCifar10(ImageDataset, SlqMixin):
+class SlqCifar10(ImageDataset, AugmentationMixin, SlqMixin):
     def __init__(self):
         super().__init__(keras.datasets.cifar10)
 
     def postprocess(
         self, train: NumpyDataset, test: NumpyDataset
     ) -> Tuple[NumpyDataset, NumpyDataset]:
+        train, test = AugmentationMixin.process(train, test)
         (x_train, y_train), (x_test, y_test) = SlqMixin.process(train, test)
         return (x_train, y_train), (x_test, y_test)
 
 
-class NoisySlqCifar10(ImageDataset, SlqMixin):
+class NoisySlqCifar10(ImageDataset, AugmentationMixin, SlqMixin):
     def __init__(self):
         super().__init__(keras.datasets.cifar10)
 
@@ -76,6 +78,7 @@ class NoisySlqCifar10(ImageDataset, SlqMixin):
             noise = 0.1 * np.random.normal(size=np.shape(ds))
             return np.clip(ds + noise, 0.0, 1.0)
 
+        train, test = AugmentationMixin.process(train, test)
         (x_train, y_train), (x_test, y_test) = train, test
 
         (x_train, y_train), (x_test, y_test) = SlqMixin.process(
