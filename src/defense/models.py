@@ -130,41 +130,78 @@ class Exformer(Reformer):
 
         inputs = keras.layers.Input(shape=self.input_shape())
         # Encoder - 1
-        x = keras.layers.Conv2D(32, 3, activation="relu", padding="same")(inputs)
+        x = keras.layers.Conv2D(
+            32,
+            3,
+            activation="relu",
+            padding="same",
+            activity_regularizer=keras.regularizers.l2(1e-9),
+        )(inputs)
         x = keras.layers.BatchNormalization()(x)
         x = keras.layers.MaxPool2D()(x)
         x = keras.layers.Dropout(0.5)(x)
         # Encoder - 2
-        skip = keras.layers.Conv2D(32, 3, padding="same")(x)
+        skip = keras.layers.Conv2D(
+            32,
+            3,
+            padding="same",
+            activity_regularizer=keras.regularizers.l2(1e-9),
+        )(x)
         x = keras.layers.LeakyReLU()(skip)
         x = keras.layers.BatchNormalization()(x)
         x = keras.layers.MaxPool2D()(x)
         x = keras.layers.Dropout(0.5)(x)
         # Encoder - Finalize
-        x = keras.layers.Conv2D(64, 3, activation="relu", padding="same")(x)
+        x = keras.layers.Conv2D(
+            64,
+            3,
+            activation="relu",
+            padding="same",
+            activity_regularizer=keras.regularizers.l2(1e-9),
+        )(x)
         x = keras.layers.BatchNormalization()(x)
         encoded = keras.layers.MaxPool2D()(x)
 
         # Decoder - 1
         x = keras.layers.Conv2DTranspose(
-            64, 3, activation="relu", strides=(2, 2), padding="same"
+            64,
+            3,
+            activation="relu",
+            strides=(2, 2),
+            padding="same",
+            activity_regularizer=keras.regularizers.l2(1e-9),
         )(encoded)
         x = keras.layers.BatchNormalization()(x)
         x = keras.layers.Dropout(0.5)(x)
         # Decoder - 2
         x = keras.layers.Conv2DTranspose(
-            32, 3, activation="relu", strides=(2, 2), padding="same"
+            32,
+            3,
+            activation="relu",
+            strides=(2, 2),
+            padding="same",
+            activity_regularizer=keras.regularizers.l2(1e-9),
         )(x)
         x = keras.layers.BatchNormalization()(x)
         x = keras.layers.Dropout(0.5)(x)
         # Decoder - 3
-        x = keras.layers.Conv2DTranspose(32, 3, padding="same")(x)
+        x = keras.layers.Conv2DTranspose(
+            32,
+            3,
+            padding="same",
+            activity_regularizer=keras.regularizers.l2(1e-9),
+        )(x)
         x = keras.layers.Add()([skip, x])
         x = keras.layers.LeakyReLU()(x)
         x = keras.layers.BatchNormalization()(x)
         # Decoder - Finalize
         decoded = keras.layers.Conv2DTranspose(
-            3, 3, activation="sigmoid", strides=(2, 2), padding="same"
+            3,
+            3,
+            activation="sigmoid",
+            strides=(2, 2),
+            padding="same",
+            activity_regularizer=keras.regularizers.l2(1e-9),
         )(x)
 
         return keras.Model(inputs, decoded)
