@@ -86,7 +86,7 @@ class Reformer(Defense):
                 )
 
         reduce_lr = keras.callbacks.ReduceLROnPlateau(
-            monitor="val_loss", factor=0.2, patience=5, min_lr=0.001
+            monitor="val_loss", factor=0.9, patience=5, min_lr=0.0001
         )
 
         return [reduce_lr, keras.callbacks.LambdaCallback(on_epoch_end=predict)]
