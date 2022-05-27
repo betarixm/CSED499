@@ -168,36 +168,25 @@ class AugmentationMixin(DatasetPostprocessMixin):
             ]
         )
 
-        # data_augmentation_2 = tf.keras.Sequential([keras.layers.RandomContrast(0.2)])
+        data_augmentation_2 = tf.keras.Sequential([keras.layers.RandomContrast(0.2)])
 
         x_train = np.concatenate(
             (
                 x_train_original,
                 data_augmentation_1(x_train_original),
-                # data_augmentation_2(x_train_original),
+                data_augmentation_2(x_train_original),
             )
         )
 
-        y_train = np.concatenate(
-            (
-                y_train_original,
-                y_train_original,
-                # y_train_original
-            )
-        )
+        y_train = np.concatenate((y_train_original, y_train_original, y_train_original))
 
         x_test = np.concatenate(
             (
                 x_test_original,
                 data_augmentation_1(x_test_original),
-                # data_augmentation_2(x_test_original),
+                data_augmentation_2(x_test_original),
             )
         )
-        y_test = np.concatenate(
-            (
-                y_test_original,
-                y_test_original,  # y_test_original
-            )
-        )
+        y_test = np.concatenate((y_test_original, y_test_original, y_test_original))
 
         return (x_train, y_train), (x_test, y_test)
