@@ -124,9 +124,20 @@ class Model(ABC):
         )
 
     def predict(self, inputs):
+        def f(x):
+            return tf.cast(self.__model(x), tf.float32)
+
         inputs = tf.cast(inputs, tf.float32)
-        outs = tf.cast(self.__model(inputs), tf.float32)
-        return inputs + (outs - inputs) * self.intensity if self.intensity < 1 else outs
+
+        return (
+            (
+                inputs + (f(inputs) - inputs) * self.intensity
+                if self.intensity > 0
+                else inputs
+            )
+            if self.intensity < 1
+            else f(inputs)
+        )
 
     def train(self, epochs: int = 100):
         self.pre_train()
